@@ -1,0 +1,120 @@
+
+kestrel picture
+  	
+Examples
+The Kestrel Programming Language
+
+Part of the documentation for the Kestrel language
+by Douglas W. Jones
+THE UNIVERSITY OF IOWA Department of Computer Science
+Index
+
+    Hello World
+    Copy Input to Output
+    Clean Up File While Copying
+    The putstring Routine
+    Recursive Converson to Decimal
+    Recursive Converson to Bases up to 32
+    Recursively Computing the Fibonacci Function
+    Printing Some Fibonacci Values 
+
+Hello World
+
+putstring( "Hello world"+LF, output );
+
+The semicolon above is optional. There is no notation for embedding nonprinting characters within a quoted string; instead, the array constant represented by the quoted string is enlarged by adding a new element to it outside the quotation marks.
+Copy Input to Output
+
+while ~eof( input )
+    putchar( getchar[ input ], output )
+end
+
+The above program illustrates the use of different kinds of parentheses and brackets to help the reader see which parenthesis matches which. The square brackets could just as easily have been replaced with regular round parentheses, without changing the meaning of the code.
+Clean Up File While Copying
+
+-- strip non ASCII content and all control characters from the input,
+-- except newline characters, while copying from input to output
+
+ch: var char
+while ~eof( input )
+    ch = getchar[ input ]
+    if ch < " " -- control characters
+        if ch = LF
+            putchar( ch, output )
+        end
+    else        -- not a control character
+        if ch < DEL -- printable
+            putchar( ch, output )
+        end
+    end -- if
+end -- while
+
+The above program illustrates the use of comments, variables, and if statements as well as a variety of simple expressions.
+The putstring Routine
+
+putstring: procedure( s:array of char, f:file )
+    -- put the string s to file f
+    for i in s.min .. s.max
+        putchar( s(i), output )
+    end
+end
+
+This example illustrates the use of a for loop as well as the use an array parameter passed by reference with bounds determined by the actual parameter.
+Recursive Converson to Decimal
+
+putdecimal: procedure( final n: uint32 )
+    -- output unsigned 32-bit integer n to file output
+    quo: var uint32
+    quo = n / 10
+    if quo > 0 putdecimal( quo ) end
+    putchar( "0" + [ n % 10 ], output )
+end
+
+This example illustrates a recursive procedure call and use of a local variable. On a more subtle level, note that the string constant "0" is an constant array of one character, and that this is automatically converted to a character constant. Also note that adding an integer to a character yields a character, so the result of the addition is a character, not an integer.
+Recursive Converson to Bases up to 32
+
+putnumber: procedure( final n: uint32, final b: 0 .. 31 )
+    -- output unsigned 32-bit integer n in base b to file output
+    digits: const "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+    -- digits[i] gives the character for the digit i in Crockford's scheme
+    -- note that digits has exactly 32 elements, I, L, O and U are omitted.
+    quo: var uint32
+    quo = n / b
+    if quo > 0 putdecimal( quo, b ) end
+    putchar( digits[ n % b ], output )
+end
+
+This illustrates range constraints on a parameter, declaration of a string constant, and indexing into that constant using it as an array. Note that we could have used the following alternative final line to avoid declaring a single-use constant:
+
+    putchar( "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[ n % 10 ], output )
+
+Recursively Computing the Fibonacci Function
+
+fib: function( final i:uint32 ) uint32
+    return i
+    if i > 1 return fib( i - 1 ) + fib( i - 2 ) end
+end
+
+This illustrates a programming style where a default return value is specified and then overridden by later computations. Here is an alternative function body using an if-then-else statement:
+
+    if i > 1 then 
+        return fib( i - 1 ) + fib( i - 2 )
+    else
+        return i
+    end
+
+Printing Some Fibonacci Values
+
+catch range in
+    for i in uint32 do
+        putstr( "fib(", output )
+        putdec( i )
+        putstr( ") = " )
+        putdec( fib( i ) )
+        putchar( NL, output )
+    end
+case range:
+    putstr( "unprintable"+NL, output )
+end
+
+This uses the range exctption that is raised when fib attempts to return a value greater than can be legally represented in using type uint32. The exception abandons the function call and the remainder of the body of the catch block, transferring control for the case that handles that exception. This main program assumes, of course, that all of the procedures and functions that are not part of the standare prologue have been included. 

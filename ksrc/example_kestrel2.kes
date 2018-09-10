@@ -1,0 +1,70 @@
+putstring( "Hello world"+LF, output );
+
+while ~eof( input )
+    putchar( getchar[ input ], output )
+end
+
+ch: var char
+while ~eof( input )
+    ch = getchar[ input ]
+    if ch < " " -- control characters
+        if ch = LF
+            putchar( ch, output )
+        end
+    else        -- not a control character
+        if ch < DEL -- printable
+            putchar( ch, output )
+        end
+    end -- if
+end -- while
+
+putstring: procedure( s:array of char, f:file )
+    -- put the string s to file f
+    for i in s.min .. s.max
+        putchar( s(i), output )
+    end
+end
+
+putdecimal: procedure( final n: uint32 )
+    -- output unsigned 32-bit integer n to file output
+    quo: var uint32
+    quo = n / 10
+    if quo > 0 putdecimal( quo ) end
+    putchar( "0" + [ n % 10 ], output )
+end
+
+putnumber: procedure( final n: uint32, final b: 0 .. 31 )
+    -- output unsigned 32-bit integer n in base b to file output
+    digits: const "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+    -- digits[i] gives the character for the digit i in Crockford's scheme
+    -- note that digits has exactly 32 elements, I, L, O and U are omitted.
+    quo: var uint32
+    quo = n / b
+    if quo > 0 putdecimal( quo, b ) end
+    putchar( digits[ n % b ], output )
+end
+
+    putchar( "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[ n % 10 ], output )
+
+fib: function( final i:uint32 ) uint32
+    return i
+    if i > 1 return fib( i - 1 ) + fib( i - 2 ) end
+end
+
+    if i > 1 then 
+        return fib( i - 1 ) + fib( i - 2 )
+    else
+        return i
+    end
+
+catch range in
+    for i in uint32 do
+        putstr( "fib(", output )
+        putdec( i )
+        putstr( ") = " )
+        putdec( fib( i ) )
+        putchar( NL, output )
+    end
+case range:
+    putstr( "unprintable"+NL, output )
+end

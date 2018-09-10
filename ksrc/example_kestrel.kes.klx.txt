@@ -1,0 +1,72 @@
+Kestrel Lexifier Tag format :
+< ID>putstring<BLK>(< WS> <STR>"Hello world"< OP>+< ID>LF< OP>,< WS> < ID>output< WS> <BLK>)< OP>;< WS>
+< WS>
+< ID>while< WS> < OP>~< ID>eof<BLK>(< WS> < ID>input< WS> <BLK>)< WS>
+< WS>    < ID>putchar<BLK>(< WS> < ID>getchar<BLK>[< WS> < ID>input< WS> <BLK>]< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< ID>end< WS>
+< WS>
+< ID>ch< OP>:< WS> < ID>var< WS> < ID>char< WS>
+< ID>while< WS> < OP>~< ID>eof<BLK>(< WS> < ID>input< WS> <BLK>)< WS>
+< WS>    < ID>ch< WS> < OP>=< WS> < ID>getchar<BLK>[< WS> < ID>input< WS> <BLK>]< WS>
+< WS>    < ID>if< WS> < ID>ch< WS> < OP><< WS> <STR>" "< WS> <CMT>-- control characters< WS>
+< WS>        < ID>if< WS> < ID>ch< WS> < OP>=< WS> < ID>LF< WS>
+< WS>            < ID>putchar<BLK>(< WS> < ID>ch< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< WS>        < ID>end< WS>
+< WS>    < ID>else< WS>        <CMT>-- not a control character< WS>
+< WS>        < ID>if< WS> < ID>ch< WS> < OP><< WS> < ID>DEL< WS> <CMT>-- printable< WS>
+< WS>            < ID>putchar<BLK>(< WS> < ID>ch< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< WS>        < ID>end< WS>
+< WS>    < ID>end< WS> <CMT>-- if< WS>
+< ID>end< WS> <CMT>-- while< WS>
+< WS>
+< ID>putstring< OP>:< WS> < ID>procedure<BLK>(< WS> < ID>s< OP>:< ID>array< WS> < ID>of< WS> < ID>char< OP>,< WS> < ID>f< OP>:< ID>file< WS> <BLK>)< WS>
+< WS>    <CMT>-- put the string s to file f< WS>
+< WS>    < ID>for< WS> < ID>i< WS> < ID>in< WS> < ID>s< OP>.< ID>min< WS> < OP>.< OP>.< WS> < ID>s< OP>.< ID>max< WS>
+< WS>        < ID>putchar<BLK>(< WS> < ID>s<BLK>(< ID>i<BLK>)< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< WS>    < ID>end< WS>
+< ID>end< WS>
+< WS>
+< ID>putdecimal< OP>:< WS> < ID>procedure<BLK>(< WS> < ID>final< WS> < ID>n< OP>:< WS> < ID>uint32< WS> <BLK>)< WS>
+< WS>    <CMT>-- output unsigned 32-bit integer n to file output< WS>
+< WS>    < ID>quo< OP>:< WS> < ID>var< WS> < ID>uint32< WS>
+< WS>    < ID>quo< WS> < OP>=< WS> < ID>n< WS> < OP>/< WS> <NUM>10< WS>
+< WS>    < ID>if< WS> < ID>quo< WS> < OP>>< WS> <NUM>0< WS> < ID>putdecimal<BLK>(< WS> < ID>quo< WS> <BLK>)< WS> < ID>end< WS>
+< WS>    < ID>putchar<BLK>(< WS> <STR>"0"< WS> < OP>+< WS> <BLK>[< WS> < ID>n< WS> < OP>%< WS> <NUM>10< WS> <BLK>]< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< ID>end< WS>
+< WS>
+< ID>putnumber< OP>:< WS> < ID>procedure<BLK>(< WS> < ID>final< WS> < ID>n< OP>:< WS> < ID>uint32< OP>,< WS> < ID>final< WS> < ID>b< OP>:< WS> <NUM>0< WS> < OP>.< OP>.< WS> <NUM>31< WS> <BLK>)< WS>
+< WS>    <CMT>-- output unsigned 32-bit integer n in base b to file output< WS>
+< WS>    < ID>digits< OP>:< WS> < ID>const< WS> <STR>"0123456789ABCDEFGHJKMNPQRSTVWXYZ"< WS>
+< WS>    <CMT>-- digits[i] gives the character for the digit i in Crockford's scheme< WS>
+< WS>    <CMT>-- note that digits has exactly 32 elements, I, L, O and U are omitted.< WS>
+< WS>    < ID>quo< OP>:< WS> < ID>var< WS> < ID>uint32< WS>
+< WS>    < ID>quo< WS> < OP>=< WS> < ID>n< WS> < OP>/< WS> < ID>b< WS>
+< WS>    < ID>if< WS> < ID>quo< WS> < OP>>< WS> <NUM>0< WS> < ID>putdecimal<BLK>(< WS> < ID>quo< OP>,< WS> < ID>b< WS> <BLK>)< WS> < ID>end< WS>
+< WS>    < ID>putchar<BLK>(< WS> < ID>digits<BLK>[< WS> < ID>n< WS> < OP>%< WS> < ID>b< WS> <BLK>]< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< ID>end< WS>
+< WS>
+< WS>    < ID>putchar<BLK>(< WS> <STR>"0123456789ABCDEFGHJKMNPQRSTVWXYZ"<BLK>[< WS> < ID>n< WS> < OP>%< WS> <NUM>10< WS> <BLK>]< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< WS>
+< ID>fib< OP>:< WS> < ID>function<BLK>(< WS> < ID>final< WS> < ID>i< OP>:< ID>uint32< WS> <BLK>)< WS> < ID>uint32< WS>
+< WS>    < ID>return< WS> < ID>i< WS>
+< WS>    < ID>if< WS> < ID>i< WS> < OP>>< WS> <NUM>1< WS> < ID>return< WS> < ID>fib<BLK>(< WS> < ID>i< WS> < OP>-< WS> <NUM>1< WS> <BLK>)< WS> < OP>+< WS> < ID>fib<BLK>(< WS> < ID>i< WS> < OP>-< WS> <NUM>2< WS> <BLK>)< WS> < ID>end< WS>
+< ID>end< WS>
+< WS>
+< WS>    < ID>if< WS> < ID>i< WS> < OP>>< WS> <NUM>1< WS> < ID>then< WS> 
+< WS>        < ID>return< WS> < ID>fib<BLK>(< WS> < ID>i< WS> < OP>-< WS> <NUM>1< WS> <BLK>)< WS> < OP>+< WS> < ID>fib<BLK>(< WS> < ID>i< WS> < OP>-< WS> <NUM>2< WS> <BLK>)< WS>
+< WS>    < ID>else< WS>
+< WS>        < ID>return< WS> < ID>i< WS>
+< WS>    < ID>end< WS>
+< WS>
+< ID>catch< WS> < ID>range< WS> < ID>in< WS>
+< WS>    < ID>for< WS> < ID>i< WS> < ID>in< WS> < ID>uint32< WS> < ID>do< WS>
+< WS>        < ID>putstr<BLK>(< WS> <STR>"fib("< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< WS>        < ID>putdec<BLK>(< WS> < ID>i< WS> <BLK>)< WS>
+< WS>        < ID>putstr<BLK>(< WS> <STR>") = "< WS> <BLK>)< WS>
+< WS>        < ID>putdec<BLK>(< WS> < ID>fib<BLK>(< WS> < ID>i< WS> <BLK>)< WS> <BLK>)< WS>
+< WS>        < ID>putchar<BLK>(< WS> < ID>NL< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< WS>    < ID>end< WS>
+< ID>case< WS> < ID>range< OP>:< WS>
+< WS>    < ID>putstr<BLK>(< WS> <STR>"unprintable"< OP>+< ID>NL< OP>,< WS> < ID>output< WS> <BLK>)< WS>
+< ID>end< WS>
+
