@@ -262,12 +262,12 @@ const LEXFUNC Lexer2::lexfuncs[NUM_LEXER_STATES] = {
 
 std::string Lexer2::MakeTag(const LexToken& token) {
    static const std::string tagnames[NUM_LEXER_STATES] = {
-      std::string(" WS"),
-      std::string(" ID"),
+      std::string("WS"),
+      std::string("ID"),
       std::string("STR"),
       std::string("NUM"),
       std::string("BLK"),
-      std::string(" OP"),
+      std::string("OP"),
       std::string("CMT"),
       std::string("ERR")
    };
@@ -284,7 +284,8 @@ std::string Lexer2::MakeTag(const LexToken& token) {
       ++it;
    }
 ///   std::string tag = StringPrintF("<%s = '%s'>" , tagnames[token.Type()].c_str() , value.c_str());
-   std::string tag = StringPrintF("<%s>%s" , tagnames[token.Type()].c_str() , value.c_str());
+///   std::string tag = StringPrintF("<%s>%s" , tagnames[token.Type()].c_str() , value.c_str());
+   std::string tag = StringPrintF("<%s>" , value.c_str());
    /// Add the newlines back in at the end so it displays correctly
    while (nlcount) {
       --nlcount;
