@@ -29,6 +29,7 @@ std::string LexerStateTypeString(LEX_TYPE t);
 class LexToken {
    LEX_TYPE type;
    int line;
+   int column;
    std::string word;
    
 public :
@@ -36,12 +37,14 @@ public :
    LexToken(LEX_TYPE t , std::string s);
    
    void SetLine(int l) {line = l;}
+   void SetColumn(int c) {column = c;}
    void PushBack(char c) {word += c;}
    void Clear();
    
-   LEX_TYPE    Type() const {return type;}
-   int         Line() const {return line;}
-   std::string Word() const {return word;}
+   LEX_TYPE    Type() const {return type;  }
+   int         Line() const {return line;  }
+   int       Column() const {return column;}
+   std::string Word() const {return word;  }
 
    int CountNewlines();
 };

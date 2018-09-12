@@ -362,6 +362,9 @@ void Lexer2::Lexify(std::istream& istrm) {
       
       LexToken token = lexfuncs[state](istrm);
       
+      token.SetLine(line);
+      token.SetColumn(column);
+      
       EAGLE_ASSERT(token.Word().size());
       
       std::cout << token.Word();
