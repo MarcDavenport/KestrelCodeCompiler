@@ -1,3 +1,14 @@
+/**
+   Exception.hpp for the Kestrel compiler
+   By Marc Davenport for Douglas Jones Fall 2018 Compiler Construction class
+   Created : 09/14/2018
+
+   Exception.hpp uses code from my library EAGLE for exception and error handling under a
+   free use license available here : https://github.com/EdgarReynaldo/EagleGUI/blob/master/EagleLicense.txt
+   
+   Modified for use with the Kestrel compiler : 09/11/2018
+*/
+
 
 /*
  *
@@ -15,15 +26,10 @@
  *
  *    Copyright 2009-2018+ by Edgar Reynaldo
  *
- *    https://github.com/EdgarReynaldo/EagleGUI
- *
  *    See EagleLicense.txt for allowed uses of this library.
- *
- *    https://github.com/EdgarReynaldo/EagleGUI/blob/master/EagleLicense.txt
  *
  *    Modified by Marc Davenport aka Edgar Reynaldo for use with the Kestrel Compiler
  */
-
 
 
 #ifndef Error_H
@@ -31,6 +37,13 @@
 
 #include <string>
 #include <cassert>
+
+
+/// TODO : Enable strict warnings by uncommenting the following line
+/// #define STRICT_ERRORS
+/// TODO : Extend STRICT_ERRORS to Lexer, not just Parser
+
+
 
 std::string EagleTraceStr(const char* exp , const char* file , int line , const char* func);
 

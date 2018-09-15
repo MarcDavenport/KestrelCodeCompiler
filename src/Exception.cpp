@@ -1,3 +1,13 @@
+/**
+   Exception.cpp for the Kestrel compiler
+   By Marc Davenport for Douglas Jones Fall 2018 Compiler Construction class
+   Created : 09/11/2018
+
+   Exception.cpp uses code from my library EAGLE for exception and error handling under a
+   free use license.
+   
+   Modified for use with the Kestrel compiler : 09/11/2018
+*/
 
 /*
  *

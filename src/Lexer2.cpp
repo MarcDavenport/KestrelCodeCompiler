@@ -57,7 +57,7 @@ LexToken::LexToken(LEX_TYPE t) :
 
 
 
-LexToken::LexToken(LEX_TYPE t , std::string s) :
+LexToken::LexToken(LEX_TYPE t , const KString& s) :
       type(t),
       line(-1),
       word(s)
@@ -68,11 +68,11 @@ LexToken::LexToken(LEX_TYPE t , std::string s) :
 
 void LexToken::Clear() {
    line = -1;
-   word = "";
+   word.Clear();
 }
 
 
-
+/** TODO : REMOVE unused
 int LexToken::CountNewlines() {
    int count = 0;
    for (unsigned int i = 0 ; i < word.size() ; ++i) {
@@ -80,7 +80,7 @@ int LexToken::CountNewlines() {
    }
    return count;
 }
-
+*/
 
 
 LexToken LexWS(std::istream& in) {

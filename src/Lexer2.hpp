@@ -30,11 +30,11 @@ class LexToken {
    LEX_TYPE type;
    int line;
    int column;
-   std::string word;
+   KString word;
    
 public :
    LexToken(LEX_TYPE t);
-   LexToken(LEX_TYPE t , std::string s);
+   LexToken(LEX_TYPE t , const KString& s);
    
    void SetLine(int l) {line = l;}
    void SetColumn(int c) {column = c;}
@@ -44,9 +44,7 @@ public :
    LEX_TYPE    Type() const {return type;  }
    int         Line() const {return line;  }
    int       Column() const {return column;}
-   std::string Word() const {return word;  }
-
-   int CountNewlines();
+   KString     Word() const {return word;  }
 };
 
 
