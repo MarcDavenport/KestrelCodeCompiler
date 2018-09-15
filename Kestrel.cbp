@@ -33,11 +33,14 @@
 			<Add option="-DDEBUG" />
 			<Add option="-DEAGLE_ASSERT_EXCEPTION" />
 		</Compiler>
+		<Unit filename="EagleLicense.txt" />
+		<Unit filename="README.txt" />
 		<Unit filename="ksrc/example_kestrel.kes" />
 		<Unit filename="ksrc/example_kestrel.kes.klx.txt" />
-		<Unit filename="src/Error.hpp" />
 		<Unit filename="src/Exception.cpp" />
 		<Unit filename="src/Exception.hpp" />
+		<Unit filename="src/KString.cpp" />
+		<Unit filename="src/KString.hpp" />
 		<Unit filename="src/LexMain.cpp" />
 		<Unit filename="src/LexTable.hpp" />
 		<Unit filename="src/Lexer1.cpp">
@@ -47,6 +50,10 @@
 		<Unit filename="src/Lexer1.hpp" />
 		<Unit filename="src/Lexer2.cpp" />
 		<Unit filename="src/Lexer2.hpp" />
+		<Unit filename="src/ParseUtils.cpp" />
+		<Unit filename="src/ParseUtils.hpp" />
+		<Unit filename="src/Parser2.cpp" />
+		<Unit filename="src/Parser2.hpp" />
 		<Unit filename="src/Utility.cpp" />
 		<Unit filename="src/Utility.hpp" />
 		<Extensions>
