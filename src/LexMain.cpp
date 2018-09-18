@@ -7,6 +7,8 @@
 
 #include "Lexer2.hpp"
 #include "Exception.hpp"
+#include "Parser2.hpp"
+
 
 /// https://svn.divms.uiowa.edu/repos/cs4980
 /// <img src="https://media.giphy.com/media/tYtQwLrP40HSw/giphy.gif" />
@@ -39,6 +41,9 @@ int main(int argc , char** argv) {
          }
       }
    }
+   
+   Parser parser;
+   parser.Parse(lex.Tokens());
    
    return 0;
 }

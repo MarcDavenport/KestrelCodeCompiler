@@ -11,14 +11,13 @@
 #define ParseUtils_HPP
 
 
-
-class KString;
+#include "KString.hpp"
 
 char CrockfordToDigit(char c32);/// returns a char in the range [0,32)
 
 int CrockfordToDecimal(unsigned short base , const KString& c32str);
 
-KString DecimalToCrockford(int decimal , short newbase) {
+KString DecimalToCrockford(int decimal , short newbase);
 
 
 

@@ -17,7 +17,7 @@
 #include "Utility.hpp"
 
 #include <cstring>
-
+#include <stack>
 
 
 /** Crockford lookup table
@@ -39,7 +39,7 @@ char CrockfordToDigit(char c32) {
    /// CrockfordToDecimal maps a Crockford letter to a decimal digit returned as a char type.
 
    /// Sanity check
-   if ((!isdigit(c32) && !isalpha(c32)) || (c == 'u' || c == 'U') {/// U and u are invalid in base 32, they map to 32
+   if ((!isdigit(c32) && !isalpha(c32)) || (c32 == 'u' || c32 == 'U')) {/// U and u are invalid in base 32, they map to 32
       throw Exception(StringPrintF(
          "CrockfordToDecimal(char c32) : c32 (%c) is an invalid character! c32 must be a letter or digit excluding U." , c32
       ));
@@ -90,20 +90,18 @@ char CrockfordToDigit(char c32) {
 
 
 
-int CrockfordToDecimal(unsigned short base , std::string c32) {
-   if (c32.empty()) {return 0;}
+int CrockfordToDecimal(unsigned short base , const KString& c32) {
+   if (c32.Empty()) {return 0;}
    
-   const int BASE = 10;
-
    bool neg = c32[0] == '-';
    int start = 0;
    if (neg) {start = 1;}
 
    int value = 0;
    
-   for (unsigned int i = start ; i < c32.size() ; ++i) {
+   for (unsigned int i = start ; i < c32.Size() ; ++i) {
       value *= base;/// Okay for the first digit, 0 * base is still zero
-      int val = (int)CrockfordToDecimal(c32[i]);/// Crockford letter i's decimal value
+      int val = (int)CrockfordToDigit(c32[i]);/// Crockford letter i's decimal value
       value += val;
    }
    return value;
@@ -115,24 +113,24 @@ KString DecimalToCrockford(int decimal , short newbase) {
    static const char* alphabet = "0123456789abcdefghjkmnpqrstvwxyz";/// Crockford's base 32 alphabet
 
    if (newbase < 0 || newbase >= 32) {
-      throw RuntimeError(StringPrintF("DecimalToCrockford : base %d is invalid or unsupported!\n" , (int)base));
+      throw Exception(StringPrintF("DecimalToCrockford : base %d is invalid or unsupported!\n" , (int)newbase));
    }
    bool neg = decimal < 0;
    decimal = abs(decimal);
    
    std::stack<char> digitstack;
    do {
-      digitstack.push_back(alphabet[decimal%newbase]);
+      digitstack.push(alphabet[decimal%newbase]);
       decimal /= newbase;
    } while (decimal > 0);
    
    KString digitstr;
    if (neg) {
-      digitstr += '-';
+      digitstr.PushBack('-');
    }
    while (!digitstack.empty()) {
-      digitstr += digitstack.back();
-      digitstack.pop_back();
+      digitstr.PushBack(digitstack.top());
+      digitstack.pop();
    }
    return digitstr;
 }

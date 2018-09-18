@@ -3,6 +3,8 @@
 #include "Lexer2.hpp"
 #include "Exception.hpp"
 #include "Utility.hpp"
+#include "KString.hpp"
+
 
 
 #include <cassert>
@@ -32,19 +34,46 @@ std::string LexerStateTypeString(LEX_TYPE t) {
 
 
 
-std::unordered_set<char> quotechars = {'\'' , '\"'};
+std::unordered_set<KChar> quotechars = {'\'' , '\"'};
 
 
 
-std::unordered_set<char> blockchars = {'(' , ')' , '{' , '}' , '[' , ']'};
+std::unordered_set<KChar> blockchars = {'(' , ')' , '{' , '}' , '[' , ']'};
 
 
+/** From Parser.cpp
+const std::unordered_set<const char*> operator_set2 = {
+   "..", ///subrange constructor
+   "/=", ///comparison
+   ">",  ///comparison
+   ">=", ///comparison
+   "<",  ///comparison
+   "<=" ///comparison 
+};
+const std::unordered_set<const char*> operator_set1 = {
+   ";", ///statement terminator/separator
+   "=", ///assignment and comparison
+   ":", ///definition
+   ",", ///separating expressions 
+   "@", ///pointer definition and use
+   "+", ///arithmetic
+   "-", ///arithmetic (unary or binary)
+   "*", ///arithmetic
+   "/", ///arithmetic
+   "%", ///arithmetic (remainder)
+   "&", ///logic
+   "|", ///logic
+   "~", ///logical not or one's complement ()
+   "."  ///field selection
+};
+*/
 
-std::unordered_set<char> opchars = {
+const std::unordered_set<KChar> opchars = {
    '+','-','*','/','%','=',/// Mathematical operators
-   '!','~','&','|','^',   /// Logical operators
-   '$','<','>',':',';',   /// Assorted operators
-   '.',','                /// Stop, continue
+   '~','&','|','^',        /// Logical operators
+   '$','<','>',':',';',    /// Assorted operators
+   '.',',',                /// Stop, continue
+   '@'                     /// Address op
 };
 
 
@@ -103,6 +132,9 @@ LexToken LexWS(std::istream& in) {
    }
    return LexToken(LEX_ERROR , "Unexpected error in LexWS???");
 }
+
+
+
 LexToken LexID(std::istream& in) {
 
    LexToken token(LEX_ID);
@@ -120,6 +152,9 @@ LexToken LexID(std::istream& in) {
    }
    return token;
 }
+
+
+
 LexToken LexSTR(std::istream& in) {
    LexToken token(LEX_STR);
    
@@ -207,18 +242,36 @@ LexToken LexBLOCK(std::istream& in) {
 }
 
 
+/** TODO : (LEXER) With operators, what about edge cases like a = -b? It could be written as a=-b without spaces */
 
 LexToken LexOP(std::istream& in) {
    LexToken token(LEX_OP);
-   bool found = false;
    
-   char c = in.peek();
-   if ((found = (opchars.find(c) != opchars.end()))) {
-      token.PushBack(in.get());
-      return token;
+   int ccount = 0;
+   while (in.good() && !in.eof() && ccount < 2) {
+      if (opchars.find(in.peek()) != opchars.end()) {
+         token.PushBack(in.get());
+         ++ccount;
+      }
+      else {
+         break;/// Op char not found
+      }
    }
-   return LexToken(LEX_ERROR , "Expected op char.");
+   if (0 == token.Word().Size()) {
+      if (!in.good() && !in.eof()) {
+         StreamFailed();
+         return LexToken(LEX_ERROR , KString("Bad stream"));
+      }
+      else if (in.eof()) {
+         return LexToken(LEX_ERROR , KString("Unexpected EOF encountered during LexOP"));
+      }
+      else {
+         return LexToken(LEX_ERROR , KString("LexOP reports op char not found!"));
+      }
+   }
+   return token;
 }
+
 
 
 LexToken LexCMT(std::istream& in) {
@@ -241,6 +294,7 @@ LexToken LexCMT(std::istream& in) {
 }
 
 
+
 LexToken LexERR(std::istream& in) {
    return LexToken(LEX_ERROR , StringPrintF("Unexpected character '%c'." , in.get()));
 }
@@ -260,7 +314,7 @@ const LEXFUNC Lexer2::lexfuncs[NUM_LEXER_STATES] = {
 
 
 
-std::string Lexer2::MakeTag(const LexToken& token) {
+KString Lexer2::MakeTag(const LexToken& token) {
    static const std::string tagnames[NUM_LEXER_STATES] = {
       std::string("WS"),
       std::string("ID"),
@@ -271,25 +325,27 @@ std::string Lexer2::MakeTag(const LexToken& token) {
       std::string("CMT"),
       std::string("ERR")
    };
-   std::string value = token.Word();
-   std::string::iterator it = value.begin();
+   KString tag("<");
+   KString value = token.Word();
+   int i = 0;
    int nlcount = 0;
    /// Strip newlines so they don't mess with our formatting
-   while (it != value.end()) {
-      if (*it == '\n') {
+   while (i < (int)value.Size()) {
+      if (value[i] == '\n') {
          nlcount++;
-         it = value.erase(it);
-         continue;
       }
-      ++it;
+      else {
+         tag.PushBack(value[i]);
+      }
+      ++i;
    }
+   tag.PushBack('>');
 ///   std::string tag = StringPrintF("<%s = '%s'>" , tagnames[token.Type()].c_str() , value.c_str());
 ///   std::string tag = StringPrintF("<%s>%s" , tagnames[token.Type()].c_str() , value.c_str());
-   std::string tag = StringPrintF("<%s>" , value.c_str());
    /// Add the newlines back in at the end so it displays correctly
    while (nlcount) {
       --nlcount;
-      tag += '\n';
+      tag.PushBack('\n');
    }
    return tag;
 }
@@ -365,19 +421,19 @@ void Lexer2::Lexify(std::istream& istrm) {
       token.SetLine(line);
       token.SetColumn(column);
       
-      EAGLE_ASSERT(token.Word().size());
+      EAGLE_ASSERT(token.Word().Size());
       
       std::cout << token.Word();
       
       tokens.push_back(token);
       
       if (token.Type() == LEX_ERROR) {
-         fprintf(stdout , "ERROR : %s on line %d column %d.\n" , token.Word().c_str() , line , column);
+         std::cout << "ERROR : " << token.Word() << "on line " << line << " column " << column << std::endl;
          EAGLE_ASSERT(istrm.good() && !istrm.eof());
       }
       
-      std::string word = token.Word();
-      for (unsigned int i = 0 ; i < word.size() ; ++i) {
+      KString word = token.Word();
+      for (unsigned int i = 0 ; i < word.Size() ; ++i) {
          if (word[i] == '\n') {++line;column = 0;} else {++column;}
       }
 

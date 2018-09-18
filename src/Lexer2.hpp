@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include <iostream>
 
-
+#include "KString.hpp"
 
 enum LEX_TYPE {
    LEX_WS      = 0,
@@ -38,7 +38,7 @@ public :
    
    void SetLine(int l) {line = l;}
    void SetColumn(int c) {column = c;}
-   void PushBack(char c) {word += c;}
+   void PushBack(char c) {word.PushBack(c);}
    void Clear();
    
    LEX_TYPE    Type() const {return type;  }
@@ -72,7 +72,7 @@ class Lexer2 {
    static const LEXFUNC lexfuncs[NUM_LEXER_STATES];
 
    
-   std::string MakeTag(const LexToken& token);
+   KString MakeTag(const LexToken& token);
    
 public :
    
@@ -88,6 +88,7 @@ public :
 
    void DumpStateTable(std::ostream& os);
    
+   const std::vector<LexToken>& Tokens() {return tokens;}
 };
 
 
