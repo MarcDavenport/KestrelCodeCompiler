@@ -37,6 +37,8 @@
 		<Unit filename="README.txt" />
 		<Unit filename="ksrc/example_kestrel.kes" />
 		<Unit filename="ksrc/example_kestrel.kes.klx.txt" />
+		<Unit filename="src/Data.cpp" />
+		<Unit filename="src/Data.hpp" />
 		<Unit filename="src/Exception.cpp" />
 		<Unit filename="src/Exception.hpp" />
 		<Unit filename="src/KString.cpp" />
