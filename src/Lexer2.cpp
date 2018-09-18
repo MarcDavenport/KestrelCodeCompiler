@@ -4,7 +4,7 @@
 #include "Exception.hpp"
 #include "Utility.hpp"
 #include "KString.hpp"
-
+#include "Data.hpp"
 
 
 #include <cassert>
@@ -34,11 +34,6 @@ std::string LexerStateTypeString(LEX_TYPE t) {
 
 
 
-std::unordered_set<KChar> quotechars = {'\'' , '\"'};
-
-
-
-std::unordered_set<KChar> blockchars = {'(' , ')' , '{' , '}' , '[' , ']'};
 
 
 /** From Parser.cpp
@@ -68,13 +63,6 @@ const std::unordered_set<const char*> operator_set1 = {
 };
 */
 
-const std::unordered_set<KChar> opchars = {
-   '+','-','*','/','%','=',/// Mathematical operators
-   '~','&','|','^',        /// Logical operators
-   '$','<','>',':',';',    /// Assorted operators
-   '.',',',                /// Stop, continue
-   '@'                     /// Address op
-};
 
 
 

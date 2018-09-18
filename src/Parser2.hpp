@@ -1,5 +1,11 @@
-
-
+/**
+   Parser2.hpp for the Kestrel compiler
+   By Marc Davenport for Douglas Jones Fall 2018 Compiler Construction class
+   Created : 09/14/2018
+   Modified : 09/18/2018
+   
+   Parser2.hpp contains the interface for the parser.
+*/
 
 
 #ifndef Parser2_HPP
@@ -189,38 +195,11 @@ public :
    void Parse(const std::vector<LexToken>& ltokens);
 };
 
-/// Parsing functions
-
-extern const std::unordered_set<KString> reserved_words;
-
-extern const std::unordered_set<KChar> block_openset;
-extern const std::unordered_set<KChar> block_closeset;
-
-
-extern const unsigned int MAX_NUM_OP_CHARS;
-extern const std::unordered_set<KString> operator_set2;/// All operators of length 2
-extern const std::unordered_set<KString> operator_set1;/// All operators of length 1
-
 
 
 typedef ParseToken (*PARSEFUNC)(const LexToken& ltoken);
 
 const extern PARSEFUNC parser_funcs[NUM_LEXER_STATES];
-
-/// Our parser_funcs
-/*
-enum LEX_TYPE {
-   LEX_WS      = 0,
-   LEX_ID      = 1,
-   LEX_STR     = 2,
-   LEX_NUM     = 3,
-   LEX_BLOCK   = 4,
-   LEX_OP      = 5,
-   LEX_COMMENT = 6,
-   LEX_ERROR   = 7,
-   NUM_LEXER_STATES = 8
-};
-*/
 
 ParseToken ParseWS(const LexToken& ltoken);
 ParseToken ParseID(const LexToken& ltoken);
