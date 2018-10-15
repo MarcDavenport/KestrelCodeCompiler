@@ -124,7 +124,7 @@ bool ParseTokenBLOCK::MatchesBlockChar(const KChar& kc) {
 
 std::string ParseTokenBLOCK::MakeTag() const {
    std::stringstream ss("");
-   ss << "<BLK='" << LexerToken().Word() << ">";
+   ss << "<BLK='" << LexerToken().Word() << "'>";
    return ss.str();
 }
 
