@@ -26,6 +26,17 @@ enum LEX_TYPE {
 std::string LexerStateTypeString(LEX_TYPE t);
 
 
+enum LEX_ERROR_TYPE {
+   LEX_NOERROR  = 0,
+   LEX_NULL     = 1,
+   LEX_EXPECT   = 2,
+   LEX_UNEXPECT = 3,
+   
+   
+};
+
+
+
 class LexToken {
    LEX_TYPE type;
    int line;
@@ -36,6 +47,7 @@ public :
    LexToken(LEX_TYPE t);
    LexToken(LEX_TYPE t , const KString& s);
    
+   void SetWord(KString w) {word = w;}
    void SetLine(int l) {line = l;}
    void SetColumn(int c) {column = c;}
    void PushBack(char c) {word.PushBack(c);}

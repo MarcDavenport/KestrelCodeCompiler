@@ -41,6 +41,10 @@
 		<Unit filename="src/Data.hpp" />
 		<Unit filename="src/Exception.cpp" />
 		<Unit filename="src/Exception.hpp" />
+		<Unit filename="src/Functions.cpp" />
+		<Unit filename="src/Functions.hpp" />
+		<Unit filename="src/KClass.cpp" />
+		<Unit filename="src/KClass.hpp" />
 		<Unit filename="src/KString.cpp" />
 		<Unit filename="src/KString.hpp" />
 		<Unit filename="src/LexMain.cpp" />
@@ -52,10 +56,14 @@
 		<Unit filename="src/Lexer1.hpp" />
 		<Unit filename="src/Lexer2.cpp" />
 		<Unit filename="src/Lexer2.hpp" />
+		<Unit filename="src/ParseTree.cpp" />
+		<Unit filename="src/ParseTree.hpp" />
 		<Unit filename="src/ParseUtils.cpp" />
 		<Unit filename="src/ParseUtils.hpp" />
 		<Unit filename="src/Parser2.cpp" />
 		<Unit filename="src/Parser2.hpp" />
+		<Unit filename="src/Rosetta.cpp" />
+		<Unit filename="src/Rosetta.hpp" />
 		<Unit filename="src/Utility.cpp" />
 		<Unit filename="src/Utility.hpp" />
 		<Extensions>
@@ -63,6 +71,7 @@
 			<envvars />
 			<debugger />
 			<lib_finder disable_auto="1" />
+			<fortran_project />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

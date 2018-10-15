@@ -24,10 +24,30 @@ ParseTokenWS::ParseTokenWS(const LexToken& token) :
 
 
 
+std::string ParseTokenWS::MakeTag() {
+   std::stringstream ss("");
+   ss << "<WS>";
+   KString word = LexerToken().Word();
+   if (word.Contains('\n')) {
+      ss << '\n';
+   }
+   return ss.str();
+}
+
+
+
 ParseTokenKEYWORD::ParseTokenKEYWORD(const LexToken& ltoken , KEYWORD_GROUP group) :
       ParseTokenBase(ltoken),
       kwgroup(group)
 {}
+
+
+
+std::string ParseTokenKEYWORD::MakeTag() {
+   std::stringstream ss("");
+   ss << "<" << KWStr(kwtype) << ">";
+   return ss.str();
+}
 
 
 
@@ -37,9 +57,25 @@ ParseTokenID::ParseTokenID(const LexToken& ltoken) :
 
 
 
+std::string ParseTokenID::MakeTag() {
+   std::stringstream ss("");
+   ss << "<ID=" << LexerToken().Word() << ">";
+   return ss.str();
+}
+
+
+
 ParseTokenSTR::ParseTokenSTR(const LexToken& ltoken) :
       ParseTokenBase(ltoken)
 {}
+
+
+
+std::string ParseTokenSTR::MakeTag() {
+   std::stringstream ss("");
+   ss << "<STR=" << LexerToken().Word() << ">";
+   return ss.str();
+}
 
 
 
@@ -51,6 +87,14 @@ ParseTokenNUM::ParseTokenNUM(const LexToken& ltoken , unsigned short numbase , K
 {
    EAGLE_ASSERT(ltoken.Type() == LEX_NUM);
    dval = CrockfordToDecimal(base , val);
+}
+
+
+
+std::string ParseTokenNUM::MakeTag() {
+   std::stringstream ss("");
+   ss << "<NUM=" << val << "_" << base << ">";
+   return ss.str();
 }
 
 
@@ -77,10 +121,26 @@ bool ParseTokenBLOCK::MatchesBlockChar(const KChar& kc) {
 
 
 
-ParseTokenOP::ParseTokenOP(const LexToken& ltoken , OPCLASS opc) :
+std::string ParseTokenBLOCK::MakeTag() {
+   std::stringstream ss("");
+   ss << "<BLK='" << LexerToken().Word() << ">";
+   return ss.str();
+}
+
+
+
+ParseTokenOP::ParseTokenOP(const LexToken& ltoken , OPNUM opnum) :
       ParseTokenBase(ltoken),
-      opclass(opc)
+      op(opnum)
 {}
+
+
+
+std::string ParseTokenOP::MakeTag() {
+   std::stringstream ss("");
+   ss << "<" << OpStr(op) << ">";
+   return ss.str();
+}
 
 
 
@@ -96,6 +156,12 @@ ParseTokenERROR::ParseTokenERROR(const LexToken& ltoken , std::string error) :
 
 
 
+std::string ParseTokenERROR::MakeTag() {
+   return "<PARSE_ERROR?>";
+}
+
+
+
 /// -----------------     ParseToken class     -----------------------
 
 
@@ -106,6 +172,12 @@ ParseToken::ParseToken(ParseTokenBase* base) :
 
 
 
+std::string ParseToken::MakeTag() {
+   return pbase->MakeTag();
+}
+
+
+
 /// --------------------------     Parser class     ----------------------
 
 
@@ -113,13 +185,23 @@ ParseToken::ParseToken(ParseTokenBase* base) :
 void Parser::Parse(const std::vector<LexToken>& ltokens) {
    Clear();
    
-   for (unsigned int i = 0 ; i < ltokens.size() ; ++i) {
-      /// First, remove all whitespace and comments, as the parser doesn't use them
-      const LexToken& token = ltokens[i];
-      if (token.Type() == LEX_COMMENT || token.Type() == LEX_ERROR) {
-         continue;/// filter comments, and errors
+   auto it = ltokens.begin();
+   while (it++ != ltokens.end()) {
+      /// We can optionally filter whitespace and comments here, and we ignore lex errors
+      const LexToken& token = *it;
+      if (token.Type() == LEX_ERROR) {
+         continue;
       }
       ptokens.push_back(parser_funcs[token.Type()](token));
+   }
+}
+
+
+
+void Parser::WriteTags(std::ostream& os) {
+   auto it = ptokens.begin();
+   while (it++ != ptokens.end()) {
+      os << it->MakeTag();/// No newline here, WS has been preserved
    }
 }
 
@@ -151,7 +233,7 @@ ParseToken ParseWS(const LexToken& token) {
 
 
 
-ParseToken ParseID(const LexToken& ltoken) {/// TODO : IMPLEMENT ME
+ParseToken ParseID(const LexToken& ltoken) {
    /// Basically this function filters out the keywords and makes everything else an identifier, type to be
    /// determined in Stage 2
    
@@ -234,17 +316,15 @@ ParseToken ParseBLOCK(const LexToken& ltoken) {
 
 
 ParseToken ParseOP(const LexToken& ltoken) {
-   bool found = operator_set2.find(ltoken.Word()) != operator_set2.end();
+   bool found = operator_set.find(ltoken.Word()) != operator_set.end();
    if (!found) {
-      found = operator_set1.find(ltoken.Word()) != operator_set1.end();
-   }
-   std::stringstream sstrm;
-   sstrm << "ParseOP reports an invalid op! (" << ltoken.Word() << ")";
-   if (!found) {
+      std::stringstream sstrm;
+      sstrm << "ParseOP reports an invalid op! (" << ltoken.Word() << ")";
       return ParseToken(new ParseTokenERROR(ltoken , sstrm.str()));
    }
-#warning FIXME I need to split ops into groups
-   return ParseToken(new ParseTokenOP(ltoken , NUM_OP_CLASSES));/// TODO : FIXME
+   
+   OPNUM op = GetOp(ltoken.Word());
+   return ParseToken(new ParseTokenOP(ltoken , op));/// TODO : FIXME
 }
 
 

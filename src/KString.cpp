@@ -87,6 +87,22 @@ KString& KString::operator=(const char* cstr) {
 
 
 
+bool KString::operator<(const KString& rhs) const {
+   for (unsigned int i = 0 ; i < rhs.Size() && i < Size() ; ++i) {
+      KChar a = kstr[i];
+      KChar b = rhs.KStr()[i];
+      if (a < b) {return true;}
+      else if (a == b) {continue;}
+      else {return false;}
+   }
+   if (Size() < rhs.Size()) {
+      return true;
+   }
+   return false;
+}
+
+
+
 bool KString::operator==(const KString& str) const {
    return kstr == str.kstr;
 }
@@ -107,6 +123,9 @@ KSTR::const_iterator KString::Find(const KChar& kc) const {
 
 
 
+bool KString::Contains(const KChar& kc) const {
+   return Find(kc) != End();
+}
 
 
 

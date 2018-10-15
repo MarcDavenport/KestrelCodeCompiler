@@ -17,6 +17,7 @@ void StreamFailed() {
 }
 
 
+
 std::string LexerStateTypeString(LEX_TYPE t) {
    static const std::string strs[NUM_LEXER_STATES + 1] = {
       std::string("LEX_WS"),
@@ -102,23 +103,20 @@ int LexToken::CountNewlines() {
 
 LexToken LexWS(std::istream& in) {
    LexToken token(LEX_WS);
-   while (in.good() && !in.eof()) {
-      char c = in.peek();
-      if (isspace(c)) {
-         token.PushBack(in.get());
-         /// HAHAHA QUICK AND DIRTY HACK TO PRESERVE NEWLINES, now all ws will be split by newlines
-         if (c == '\n') {
-            return token;
-         }
-         if (!in.good() && !in.eof()) {
-            StreamFailed();
-         }
-      }
-      else {
+   char c = in.peek();
+   EAGLE_ASSERT(isspace(c));
+   while (in.good() && !in.eof() && isspace(c)) {
+      token.PushBack(in.get());
+      /// HAHAHA QUICK AND DIRTY HACK TO PRESERVE NEWLINES, now all ws will be split by newlines
+      if (c == '\n') {
          return token;
       }
+      if (!in.good() && !in.eof()) {
+         StreamFailed();
+      }
+      c = in.peek();
    }
-   return LexToken(LEX_ERROR , "Unexpected error in LexWS???");
+   return token;
 }
 
 
@@ -127,16 +125,15 @@ LexToken LexID(std::istream& in) {
 
    LexToken token(LEX_ID);
    
-   if (in.good()) {
-      char c = in.peek();
-      EAGLE_ASSERT(isalpha(c));
-      while (isalpha(c) || isdigit(c)) {
-         token.PushBack(in.get());
-         c = in.peek();
-         if (!in.good()) {
-            StreamFailed();
-         }
-      }
+   char c = in.peek();
+   EAGLE_ASSERT(isalpha(c));
+   
+   while (in.good() && (isalpha(c) || isdigit(c))) {
+      token.PushBack(in.get());
+      c = in.peek();
+   }
+   if (!in.good()) {
+      StreamFailed();
    }
    return token;
 }
@@ -146,25 +143,22 @@ LexToken LexID(std::istream& in) {
 LexToken LexSTR(std::istream& in) {
    LexToken token(LEX_STR);
    
-   if (in.good()) {
-      char c = in.peek();
-      EAGLE_ASSERT(c == '\"' || c == '\'');
-      char qtype = c;
-      do {
-         token.PushBack(in.get());
-         if (!in.good()) {
-            StreamFailed();
-            goto error;
-         }
-         c = in.peek();
-         if (c == EOF) {
-            return LexToken(LEX_ERROR , "Unexpected EOF. Expected closing quote.");
-         }
-      } while (c != qtype);
+   char c = in.peek();
+   EAGLE_ASSERT(c == '\"' || c == '\'');
+   char qtype = c;
+   do {
       token.PushBack(in.get());
-      return token;
-   }
-   StreamFailed();
+      if (!in.good()) {
+         goto error;
+      }
+      c = in.peek();
+      if (c == EOF) {
+         return LexToken(LEX_ERROR , "Unexpected EOF. Expected closing quote.");
+      }
+   } while (c != qtype);
+   token.PushBack(in.get());
+   return token;
+
    error:
    return LexToken(LEX_ERROR , "Bad Stream");
 }
@@ -173,16 +167,12 @@ LexToken LexSTR(std::istream& in) {
 
 LexToken LexNUM(std::istream& in) {
    char c = in.peek();
-   if (!isdigit(c)) {
-      EAGLE_ASSERT(isdigit(c));
-      return LexToken(LEX_ERROR , "Expected number.");
-   }
+   EAGLE_ASSERT(isdigit(c));
 
    LexToken token(LEX_NUM);
    while (isdigit(c)) {
       token.PushBack(in.get());
-      if (!in.good()) {
-         StreamFailed();
+      if (!in.good() && !in.eof()) {
          goto error;
       }
       if (in.eof()) {
@@ -193,14 +183,12 @@ LexToken LexNUM(std::istream& in) {
    if (c == '#') {
       token.PushBack(in.get());
       if (!in.good()) {
-         StreamFailed();
          goto error;
       }
       c = in.peek();
       while (isdigit(c)) {
          token.PushBack(in.get());
-         if (!in.good()) {
-            StreamFailed();
+         if (!in.good() && !in.eof()) {
             goto error;
          }
          if (in.eof()) {
@@ -210,7 +198,9 @@ LexToken LexNUM(std::istream& in) {
       }
    }
    return token;
+
    error:
+   StreamFailed();
    return LexToken(LEX_ERROR , "Bad Stream.");
 }
 
@@ -219,10 +209,9 @@ LexToken LexNUM(std::istream& in) {
 LexToken LexBLOCK(std::istream& in) {
 
    LexToken token(LEX_BLOCK);
-   bool found = false;
-   
+
    char c = in.peek();
-   if ((found = (blockchars.find(c) != blockchars.end()))) {
+   if (blockchars.find(c) != blockchars.end()) {
       token.PushBack(in.get());
       return token;
    }
@@ -235,27 +224,23 @@ LexToken LexBLOCK(std::istream& in) {
 LexToken LexOP(std::istream& in) {
    LexToken token(LEX_OP);
    
-   int ccount = 0;
-   while (in.good() && !in.eof() && ccount < 2) {
-      if (opchars.find(in.peek()) != opchars.end()) {
-         token.PushBack(in.get());
-         ++ccount;
-      }
-      else {
-         break;/// Op char not found
-      }
+   if (opchars.find(in.peek()) == opchars.end()) {
+      return LexToken(LEX_ERROR , KString(StringPrintF("Expected op char. Got %c" , (char)in.peek())));
    }
-   if (0 == token.Word().Size()) {
-      if (!in.good() && !in.eof()) {
-         StreamFailed();
-         return LexToken(LEX_ERROR , KString("Bad stream"));
-      }
-      else if (in.eof()) {
-         return LexToken(LEX_ERROR , KString("Unexpected EOF encountered during LexOP"));
-      }
-      else {
-         return LexToken(LEX_ERROR , KString("LexOP reports op char not found!"));
-      }
+   KString w;
+
+   w.PushBack(in.peek());
+
+   token.PushBack(in.get());
+
+   if (!in.good() && !in.eof()) {
+      StreamFailed();
+   }
+
+   w.PushBack(in.peek());
+
+   if (operator_set.find(w) != operator_set.end()) {
+      token.PushBack(in.get());
    }
    return token;
 }
@@ -272,12 +257,11 @@ LexToken LexCMT(std::istream& in) {
          token.PushBack(in.get());
       }
    } while (in.good() && !in.eof() && c != '\n');
-   if (!in.good()) {
+
+   if (!in.good() && !in.eof()) {
       StreamFailed();
    }
-   if (in.eof()) {
-      return LexToken(LEX_ERROR , "Unexpected EOF in LexCMT");
-   }
+
    return token;
 }
 
@@ -366,6 +350,7 @@ LEX_TYPE Lexer2::LexerState(char c) {
          else if (blockchars.find(ch) != blockchars.end()) {state_table[i] = LEX_BLOCK;}
          else if (opchars.find(ch) != opchars.end())       {state_table[i] = LEX_OP;}
          else                                              {state_table[i] = LEX_ERROR;}
+
          if (ch == 127) {break;}
       }
       ready = 1;

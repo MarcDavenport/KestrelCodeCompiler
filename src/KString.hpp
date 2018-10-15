@@ -34,12 +34,16 @@ public :
    
    KString& operator=(const char* cstr);
 
+   bool operator<(const KString& rhs) const ;
+   
    bool operator==(const KString& str) const;
 
    KSTR::const_iterator Begin() const {return kstr.begin();}
    KSTR::const_iterator End() const {return kstr.end();}
 
    KSTR::const_iterator Find(const KChar& kc) const;
+   bool Contains(const KChar& kc) const;
+   
    
    inline void         PushBack(KChar kc) {kstr.push_back(kc);}
 

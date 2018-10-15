@@ -12,10 +12,12 @@
 #define Parser2_HPP
 
 
-#include "Lexer2.hpp"
-
 #include <memory>
 #include <vector>
+
+#include "Lexer2.hpp"
+#include "Data.hpp"
+
 
 
 enum PARSE_TYPE {
@@ -46,6 +48,9 @@ public :
    LexToken LexerToken() {return lextoken;}
    
    virtual PARSE_TYPE ParserType() const =0;
+
+   virtual std::string MakeTag()=0;
+   
 };
 
 
@@ -59,32 +64,23 @@ public :
    ParseTokenWS(const LexToken& token);
 
    inline PARSE_TYPE ParserType() const override {return PARSE_WS;}
-};
 
-
-
-enum KEYWORD_GROUP {
-   KWG_MODIFIER = 0,
-   KWG_DECLARATION = 1,
-   KWG_ACCESS = 2,
-   KWG_TYPE = 3,
-   KWG_RANGE = 4,/// ??? in?, of? what are these
-   KWG_CONTROL = 5,
-   KWG_LOOP = 6,
-   KWG_EXCEPTION = 7,
-   KWG_NULLPTR = 8,
-   NUM_KEYWORD_GROUPS = 9
+   virtual std::string MakeTag() override ;
 };
 
 
 
 class ParseTokenKEYWORD : public ParseTokenBase {
    KEYWORD_GROUP kwgroup;
+   KEYWORD_TYPE kwtype;
 public :
    ParseTokenKEYWORD(const LexToken& ltoken , KEYWORD_GROUP group);
    
    KEYWORD_GROUP Group() {return kwgroup;}
+   KEYWORD_TYPE WordType() {return kwtype;}
    inline PARSE_TYPE ParserType() const override {return PARSE_KEYWORD;}
+
+   virtual std::string MakeTag() override ;
 };
 
 
@@ -94,6 +90,8 @@ public :
    ParseTokenID(const LexToken& ltoken);
 
    inline PARSE_TYPE ParserType() const override {return PARSE_IDENTIFIER;}
+
+   virtual std::string MakeTag() override ;
 };
 
 
@@ -103,6 +101,8 @@ public :
    ParseTokenSTR(const LexToken& ltoken);
 
    inline PARSE_TYPE ParserType() const override {return PARSE_STRING;}
+
+   virtual std::string MakeTag() override ;
 };
 
 
@@ -120,6 +120,8 @@ public :
    inline int DecimalValue()    const {return dval;}
    
    inline PARSE_TYPE ParserType() const override {return PARSE_NUMBER;}
+
+   virtual std::string MakeTag() override ;
 };
 
 
@@ -133,26 +135,21 @@ public :
    bool MatchesBlockChar(const KChar& kc);
    
    inline PARSE_TYPE ParserType() const override {return PARSE_BLOCK;}
-};
 
-
-
-enum OPCLASS {
-   OP_MULTIPLY    = 0,
-   OP_ADDITION    = 1,
-   OP_COMPARE     = 2,
-   OP_OTHER       = 3,
-   NUM_OP_CLASSES = 4
+   virtual std::string MakeTag() override ;
 };
 
 
 
 class ParseTokenOP : public ParseTokenBase {
-   OPCLASS opclass;
+   OPNUM op;
 public :
-   ParseTokenOP(const LexToken& ltoken , OPCLASS opc);
+   ParseTokenOP(const LexToken& ltoken , OPNUM opnum);
 
    inline PARSE_TYPE ParserType() const override {return PARSE_OPERATOR;}
+   inline OPNUM Op() {return op;}
+
+   virtual std::string MakeTag() override ;
 };
 
 
@@ -166,6 +163,8 @@ public :
    
    inline std::string Error() {return err;}
    inline PARSE_TYPE ParserType() const override {return PARSE_ERROR;}
+
+   virtual std::string MakeTag() override ;
 };
 
 
@@ -181,6 +180,10 @@ public :
    LexToken LexerToken() {return pbase->LexerToken();}
 
    inline PARSE_TYPE ParserType() {return pbase->ParserType();}
+
+   inline ParseTokenBase* get() {return pbase.get();}
+   
+   std::string MakeTag();
 };
 
 
@@ -188,11 +191,15 @@ public :
 class Parser {
 protected :
    std::vector<ParseToken> ptokens;
+
+
 public :
    
    inline void Clear() {ptokens.clear();}
    
    void Parse(const std::vector<LexToken>& ltokens);
+
+   void WriteTags(std::ostream& os);
 };
 
 
