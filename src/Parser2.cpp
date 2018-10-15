@@ -24,7 +24,7 @@ ParseTokenWS::ParseTokenWS(const LexToken& token) :
 
 
 
-std::string ParseTokenWS::MakeTag() {
+std::string ParseTokenWS::MakeTag() const {
    std::stringstream ss("");
    ss << "<WS>";
    KString word = LexerToken().Word();
@@ -36,14 +36,15 @@ std::string ParseTokenWS::MakeTag() {
 
 
 
-ParseTokenKEYWORD::ParseTokenKEYWORD(const LexToken& ltoken , KEYWORD_GROUP group) :
+ParseTokenKEYWORD::ParseTokenKEYWORD(const LexToken& ltoken , KEYWORD_GROUP group , KEYWORD_TYPE type) :
       ParseTokenBase(ltoken),
-      kwgroup(group)
+      kwgroup(group),
+      kwtype(type)
 {}
 
 
 
-std::string ParseTokenKEYWORD::MakeTag() {
+std::string ParseTokenKEYWORD::MakeTag() const {
    std::stringstream ss("");
    ss << "<" << KWStr(kwtype) << ">";
    return ss.str();
@@ -57,7 +58,7 @@ ParseTokenID::ParseTokenID(const LexToken& ltoken) :
 
 
 
-std::string ParseTokenID::MakeTag() {
+std::string ParseTokenID::MakeTag() const {
    std::stringstream ss("");
    ss << "<ID=" << LexerToken().Word() << ">";
    return ss.str();
@@ -71,7 +72,7 @@ ParseTokenSTR::ParseTokenSTR(const LexToken& ltoken) :
 
 
 
-std::string ParseTokenSTR::MakeTag() {
+std::string ParseTokenSTR::MakeTag() const {
    std::stringstream ss("");
    ss << "<STR=" << LexerToken().Word() << ">";
    return ss.str();
@@ -91,7 +92,7 @@ ParseTokenNUM::ParseTokenNUM(const LexToken& ltoken , unsigned short numbase , K
 
 
 
-std::string ParseTokenNUM::MakeTag() {
+std::string ParseTokenNUM::MakeTag() const {
    std::stringstream ss("");
    ss << "<NUM=" << val << "_" << base << ">";
    return ss.str();
@@ -121,7 +122,7 @@ bool ParseTokenBLOCK::MatchesBlockChar(const KChar& kc) {
 
 
 
-std::string ParseTokenBLOCK::MakeTag() {
+std::string ParseTokenBLOCK::MakeTag() const {
    std::stringstream ss("");
    ss << "<BLK='" << LexerToken().Word() << ">";
    return ss.str();
@@ -136,7 +137,7 @@ ParseTokenOP::ParseTokenOP(const LexToken& ltoken , OPNUM opnum) :
 
 
 
-std::string ParseTokenOP::MakeTag() {
+std::string ParseTokenOP::MakeTag() const {
    std::stringstream ss("");
    ss << "<" << OpStr(op) << ">";
    return ss.str();
@@ -156,7 +157,7 @@ ParseTokenERROR::ParseTokenERROR(const LexToken& ltoken , std::string error) :
 
 
 
-std::string ParseTokenERROR::MakeTag() {
+std::string ParseTokenERROR::MakeTag() const {
    return "<PARSE_ERROR?>";
 }
 
@@ -172,8 +173,8 @@ ParseToken::ParseToken(ParseTokenBase* base) :
 
 
 
-std::string ParseToken::MakeTag() {
-   return pbase->MakeTag();
+std::string ParseToken::MakeTag() const {
+   return get()->MakeTag();
 }
 
 
@@ -186,13 +187,15 @@ void Parser::Parse(const std::vector<LexToken>& ltokens) {
    Clear();
    
    auto it = ltokens.begin();
-   while (it++ != ltokens.end()) {
+   while (it != ltokens.end()) {
       /// We can optionally filter whitespace and comments here, and we ignore lex errors
       const LexToken& token = *it;
-      if (token.Type() == LEX_ERROR) {
+      if (token.Type() == LEX_ERROR || token.Type() == LEX_COMMENT) {
+         ++it;
          continue;
       }
       ptokens.push_back(parser_funcs[token.Type()](token));
+      ++it;
    }
 }
 
@@ -200,8 +203,8 @@ void Parser::Parse(const std::vector<LexToken>& ltokens) {
 
 void Parser::WriteTags(std::ostream& os) {
    auto it = ptokens.begin();
-   while (it++ != ptokens.end()) {
-      os << it->MakeTag();/// No newline here, WS has been preserved
+   for (const auto& ptoken : ptokens) {
+      os << ptoken.MakeTag();/// No newline here, WS has been preserved
    }
 }
 
@@ -236,12 +239,25 @@ ParseToken ParseWS(const LexToken& token) {
 ParseToken ParseID(const LexToken& ltoken) {
    /// Basically this function filters out the keywords and makes everything else an identifier, type to be
    /// determined in Stage 2
-   
+   KEYWORD_TYPE type = NUM_KEYWORDS;
    /// Sanity check
    EAGLE_ASSERT(ltoken.Type() == LEX_ID);
    
    /// May be reserved word, which consists of control commands, and...TODO
-   std::unordered_set<KString>::const_iterator it = reserved_words.find(ltoken.Word());
+   auto it = reserved_words.begin();
+   int i = 0 , index = -1;
+   while (it != reserved_words.end()) {
+      if (ltoken.Word() == *it) {
+         index = i;
+         break;
+      }
+      ++i;
+      ++it;
+   }
+   if (index != -1) {
+      type = (KEYWORD_TYPE)index;
+   }
+
    if (it != reserved_words.end()) {
 
       KEYWORD_GROUP group = NUM_KEYWORD_GROUPS;
@@ -258,7 +274,7 @@ ParseToken ParseID(const LexToken& ltoken) {
       }
 
       if (found) {
-         return ParseToken(new ParseTokenKEYWORD(ltoken , group));
+         return ParseToken(new ParseTokenKEYWORD(ltoken , group , type));
       }
 
       EAGLE_ASSERT(found);
@@ -332,23 +348,6 @@ ParseToken ParseOP(const LexToken& ltoken) {
 
 
 
-
-/** Not used
-ParseToken ParseCMT(const LexToken& ltoken);
-ParseToken ParseCMT(const LexToken& ltoken) {
-   #error UNUSED
-};
-*/
-
-
-
-/** Not used
-ParseToken ParseERROR(const LexToken& ltoken) {
-   #error UNUSED
-}
-*/
-
-
 /*
 enum LEX_TYPE {
    LEX_WS      = 0,
@@ -372,7 +371,7 @@ const PARSEFUNC parser_funcs[NUM_LEXER_STATES] = {
    ParseNUM,
    ParseBLOCK,
    ParseOP,
-   0,           ///ParseCMT,
-   0            /// ParseERROR
+   0,        ///   ParseCMT,
+   0         ///   ParseError
 };
 

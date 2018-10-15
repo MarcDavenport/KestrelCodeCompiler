@@ -31,7 +31,7 @@ extern const std::unordered_set<KChar> opchars;
 extern const std::unordered_set<KChar> block_openset;
 extern const std::unordered_set<KChar> block_closeset;
 
-extern const std::unordered_set<KString> reserved_words;
+extern const std::vector<KString> reserved_words;
 extern const std::vector< std::unordered_set<KString> > reserved_word_sets;
 
 enum OPNUM {

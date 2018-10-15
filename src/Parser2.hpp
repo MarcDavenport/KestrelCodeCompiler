@@ -45,11 +45,11 @@ public :
    
    virtual ~ParseTokenBase() {}
    
-   LexToken LexerToken() {return lextoken;}
+   LexToken LexerToken() const {return lextoken;}
    
    virtual PARSE_TYPE ParserType() const =0;
 
-   virtual std::string MakeTag()=0;
+   virtual std::string MakeTag() const =0;
    
 };
 
@@ -65,7 +65,7 @@ public :
 
    inline PARSE_TYPE ParserType() const override {return PARSE_WS;}
 
-   virtual std::string MakeTag() override ;
+   virtual std::string MakeTag() const override;
 };
 
 
@@ -74,13 +74,13 @@ class ParseTokenKEYWORD : public ParseTokenBase {
    KEYWORD_GROUP kwgroup;
    KEYWORD_TYPE kwtype;
 public :
-   ParseTokenKEYWORD(const LexToken& ltoken , KEYWORD_GROUP group);
+   ParseTokenKEYWORD(const LexToken& ltoken , KEYWORD_GROUP group , KEYWORD_TYPE type);
    
    KEYWORD_GROUP Group() {return kwgroup;}
    KEYWORD_TYPE WordType() {return kwtype;}
    inline PARSE_TYPE ParserType() const override {return PARSE_KEYWORD;}
 
-   virtual std::string MakeTag() override ;
+   virtual std::string MakeTag() const override;
 };
 
 
@@ -91,7 +91,7 @@ public :
 
    inline PARSE_TYPE ParserType() const override {return PARSE_IDENTIFIER;}
 
-   virtual std::string MakeTag() override ;
+   virtual std::string MakeTag() const override ;
 };
 
 
@@ -102,7 +102,7 @@ public :
 
    inline PARSE_TYPE ParserType() const override {return PARSE_STRING;}
 
-   virtual std::string MakeTag() override ;
+   virtual std::string MakeTag() const override ;
 };
 
 
@@ -121,7 +121,7 @@ public :
    
    inline PARSE_TYPE ParserType() const override {return PARSE_NUMBER;}
 
-   virtual std::string MakeTag() override ;
+   virtual std::string MakeTag() const override ;
 };
 
 
@@ -136,7 +136,7 @@ public :
    
    inline PARSE_TYPE ParserType() const override {return PARSE_BLOCK;}
 
-   virtual std::string MakeTag() override ;
+   virtual std::string MakeTag() const override ;
 };
 
 
@@ -149,7 +149,7 @@ public :
    inline PARSE_TYPE ParserType() const override {return PARSE_OPERATOR;}
    inline OPNUM Op() {return op;}
 
-   virtual std::string MakeTag() override ;
+   virtual std::string MakeTag() const override ;
 };
 
 
@@ -164,7 +164,7 @@ public :
    inline std::string Error() {return err;}
    inline PARSE_TYPE ParserType() const override {return PARSE_ERROR;}
 
-   virtual std::string MakeTag() override ;
+   virtual std::string MakeTag() const override ;
 };
 
 
@@ -177,13 +177,14 @@ public :
    
    ParseToken(ParseTokenBase* base);
    
-   LexToken LexerToken() {return pbase->LexerToken();}
+   LexToken LexerToken() const {return pbase->LexerToken();}
 
    inline PARSE_TYPE ParserType() {return pbase->ParserType();}
 
    inline ParseTokenBase* get() {return pbase.get();}
+   inline const ParseTokenBase* get() const {return pbase.get();}
    
-   std::string MakeTag();
+   std::string MakeTag() const;
 };
 
 

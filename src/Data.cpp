@@ -76,7 +76,7 @@ std::string KWStr(KEYWORD_TYPE k) {
 
 
 
-const std::unordered_set<KString> reserved_words = {
+const std::vector<KString> reserved_words = {
    KString("const"),        /// various definitions
    KString("final"),
 

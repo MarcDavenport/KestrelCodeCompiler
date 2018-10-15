@@ -36,7 +36,7 @@ int main(int argc , char** argv) {
       lex.Lexify(fin);
       fin.close();
 
-      std::string opfile = std::string(argv[i]) + ".kes.out.txt";
+      std::string opfile = std::string(argv[i]) + ".kcc.txt";
       std::ofstream fout(opfile.c_str());
       
       std::ostream* output = fout.good()?&fout:&std::cout;
