@@ -396,12 +396,12 @@ void Lexer2::Lexify(std::istream& istrm) {
       
       EAGLE_ASSERT(token.Word().Size());
       
-      std::cout << token.Word();
+///      std::cout << token.Word();
       
       tokens.push_back(token);
       
       if (token.Type() == LEX_ERROR) {
-         std::cout << "ERROR : " << token.Word() << "on line " << line << " column " << column << std::endl;
+         std::cerr << "ERROR : " << token.Word() << "on line " << line << " column " << column << std::endl;
          EAGLE_ASSERT(istrm.good() && !istrm.eof());
       }
       
@@ -422,6 +422,16 @@ void Lexer2::WriteTags(std::ostream& os) {
    os << "Kestrel Lexifier Tag format :" << std::endl;
    for (unsigned int i = 0 ; i < tokens.size() ; ++i) {
       os << MakeTag(tokens[i]);/// Our tags take care of newlines
+   }
+   os << std::endl;
+}
+
+
+
+void Lexer2::WriteWords(std::ostream& os) {
+   os << "Kestrel code compiler sanity check. Original file :" << std::endl;
+   for (unsigned int i = 0 ; i < tokens.size() ; ++i) {
+      os << tokens[i].Word();
    }
    os << std::endl;
 }

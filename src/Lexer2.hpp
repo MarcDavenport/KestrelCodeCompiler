@@ -97,6 +97,8 @@ public :
    void Lexify(std::istream& istrm);
 
    void WriteTags(std::ostream& os);
+   
+   void WriteWords(std::ostream& os);
 
    void DumpStateTable(std::ostream& os);
    

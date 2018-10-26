@@ -46,7 +46,7 @@ ParseTokenKEYWORD::ParseTokenKEYWORD(const LexToken& ltoken , KEYWORD_GROUP grou
 
 std::string ParseTokenKEYWORD::MakeTag() const {
    std::stringstream ss("");
-   ss << "<" << KWStr(kwtype) << ">";
+   ss << "<KW=" << kwtype << "," << KWStr(kwtype) << ">";
    return ss.str();
 }
 
@@ -263,7 +263,7 @@ ParseToken ParseID(const LexToken& ltoken) {
       KEYWORD_GROUP group = NUM_KEYWORD_GROUPS;
       bool found = false;
       
-      for (unsigned int i = 0 ; i < NUM_KEYWORD_GROUPS ; ++i) {
+      for (i = 0 ; i < NUM_KEYWORD_GROUPS ; ++i) {
          const std::unordered_set<KString>& wset = reserved_word_sets[i];
          std::unordered_set<KString>::const_iterator it = wset.find(ltoken.Word());
          if (it != wset.end()) {

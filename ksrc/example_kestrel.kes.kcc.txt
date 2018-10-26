@@ -1,0 +1,223 @@
+SANITY PHASE {
+Kestrel code compiler sanity check. Original file :
+putstring( "Hello world"+LF, output );
+
+while ~eof( input )
+    putchar( getchar[ input ], output )
+end
+
+ch: var char
+while ~eof( input )
+    ch = getchar[ input ]
+    if ch < " " -- control characters
+        if ch = LF
+            putchar( ch, output )
+        end
+    else        -- not a control character
+        if ch < DEL -- printable
+            putchar( ch, output )
+        end
+    end -- if
+end -- while
+
+putstring: procedure( s:array of char, f:file )
+    -- put the string s to file f
+    for i in s.min .. s.max
+        putchar( s(i), output )
+    end
+end
+
+putdecimal: procedure( final n: uint32 )
+    -- output unsigned 32-bit integer n to file output
+    quo: var uint32
+    quo = n / 10
+    if quo > 0 putdecimal( quo ) end
+    putchar( "0" + [ n % 10 ], output )
+end
+
+putnumber: procedure( final n: uint32, final b: 0 .. 31 )
+    -- output unsigned 32-bit integer n in base b to file output
+    digits: const "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+    -- digits[i] gives the character for the digit i in Crockford's scheme
+    -- note that digits has exactly 32 elements, I, L, O and U are omitted.
+    quo: var uint32
+    quo = n / b
+    if quo > 0 putdecimal( quo, b ) end
+    putchar( digits[ n % b ], output )
+end
+
+    putchar( "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[ n % 10 ], output )
+
+fib: function( final i:uint32 ) uint32
+    return i
+    if i > 1 return fib( i - 1 ) + fib( i - 2 ) end
+end
+
+    if i > 1 then 
+        return fib( i - 1 ) + fib( i - 2 )
+    else
+        return i
+    end
+
+catch range in
+    for i in uint32 do
+        putstr( "fib(", output )
+        putdec( i )
+        putstr( ") = " )
+        putdec( fib( i ) )
+        putchar( NL, output )
+    end
+case range:
+    putstr( "unprintable"+NL, output )
+end
+
+}
+
+LEXING PHASE {
+Kestrel Lexifier Tag format :
+<putstring><(>< ><"Hello world"><+><LF><,>< ><output>< ><)><;><>
+<>
+<while>< ><~><eof><(>< ><input>< ><)><>
+<    ><putchar><(>< ><getchar><[>< ><input>< ><]><,>< ><output>< ><)><>
+<end><>
+<>
+<ch><:>< ><var>< ><char><>
+<while>< ><~><eof><(>< ><input>< ><)><>
+<    ><ch>< ><=>< ><getchar><[>< ><input>< ><]><>
+<    ><if>< ><ch>< ><<>< ><" ">< ><-- control characters><>
+<        ><if>< ><ch>< ><=>< ><LF><>
+<            ><putchar><(>< ><ch><,>< ><output>< ><)><>
+<        ><end><>
+<    ><else><        ><-- not a control character><>
+<        ><if>< ><ch>< ><<>< ><DEL>< ><-- printable><>
+<            ><putchar><(>< ><ch><,>< ><output>< ><)><>
+<        ><end><>
+<    ><end>< ><-- if><>
+<end>< ><-- while><>
+<>
+<putstring><:>< ><procedure><(>< ><s><:><array>< ><of>< ><char><,>< ><f><:><file>< ><)><>
+<    ><-- put the string s to file f><>
+<    ><for>< ><i>< ><in>< ><s><.><min>< ><..>< ><s><.><max><>
+<        ><putchar><(>< ><s><(><i><)><,>< ><output>< ><)><>
+<    ><end><>
+<end><>
+<>
+<putdecimal><:>< ><procedure><(>< ><final>< ><n><:>< ><uint32>< ><)><>
+<    ><-- output unsigned 32-bit integer n to file output><>
+<    ><quo><:>< ><var>< ><uint32><>
+<    ><quo>< ><=>< ><n>< ></>< ><10><>
+<    ><if>< ><quo>< ><>>< ><0>< ><putdecimal><(>< ><quo>< ><)>< ><end><>
+<    ><putchar><(>< ><"0">< ><+>< ><[>< ><n>< ><%>< ><10>< ><]><,>< ><output>< ><)><>
+<end><>
+<>
+<putnumber><:>< ><procedure><(>< ><final>< ><n><:>< ><uint32><,>< ><final>< ><b><:>< ><0>< ><..>< ><31>< ><)><>
+<    ><-- output unsigned 32-bit integer n in base b to file output><>
+<    ><digits><:>< ><const>< ><"0123456789ABCDEFGHJKMNPQRSTVWXYZ"><>
+<    ><-- digits[i] gives the character for the digit i in Crockford's scheme><>
+<    ><-- note that digits has exactly 32 elements, I, L, O and U are omitted.><>
+<    ><quo><:>< ><var>< ><uint32><>
+<    ><quo>< ><=>< ><n>< ></>< ><b><>
+<    ><if>< ><quo>< ><>>< ><0>< ><putdecimal><(>< ><quo><,>< ><b>< ><)>< ><end><>
+<    ><putchar><(>< ><digits><[>< ><n>< ><%>< ><b>< ><]><,>< ><output>< ><)><>
+<end><>
+<>
+<    ><putchar><(>< ><"0123456789ABCDEFGHJKMNPQRSTVWXYZ"><[>< ><n>< ><%>< ><10>< ><]><,>< ><output>< ><)><>
+<>
+<fib><:>< ><function><(>< ><final>< ><i><:><uint32>< ><)>< ><uint32><>
+<    ><return>< ><i><>
+<    ><if>< ><i>< ><>>< ><1>< ><return>< ><fib><(>< ><i>< ><->< ><1>< ><)>< ><+>< ><fib><(>< ><i>< ><->< ><2>< ><)>< ><end><>
+<end><>
+<>
+<    ><if>< ><i>< ><>>< ><1>< ><then>< >
+<        ><return>< ><fib><(>< ><i>< ><->< ><1>< ><)>< ><+>< ><fib><(>< ><i>< ><->< ><2>< ><)><>
+<    ><else><>
+<        ><return>< ><i><>
+<    ><end><>
+<>
+<catch>< ><range>< ><in><>
+<    ><for>< ><i>< ><in>< ><uint32>< ><do><>
+<        ><putstr><(>< ><"fib("><,>< ><output>< ><)><>
+<        ><putdec><(>< ><i>< ><)><>
+<        ><putstr><(>< ><") = ">< ><)><>
+<        ><putdec><(>< ><fib><(>< ><i>< ><)>< ><)><>
+<        ><putchar><(>< ><NL><,>< ><output>< ><)><>
+<    ><end><>
+<case>< ><range><:><>
+<    ><putstr><(>< ><"unprintable"><+><NL><,>< ><output>< ><)><>
+<end><>
+
+}
+
+PARSING PHASE {
+<ID=putstring><BLK='('><WS><STR="Hello world"><OP_PLUS><ID=LF><OP_COMMA><WS><ID=output><WS><BLK=')'><OP_STOP><WS>
+<WS>
+<KW=21,KW_LOOP_WHILE><WS><OP_NOT><ID=eof><BLK='('><WS><ID=input><WS><BLK=')'><WS>
+<WS><ID=putchar><BLK='('><WS><ID=getchar><BLK='['><WS><ID=input><WS><BLK=']'><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<KW=18,KW_CONTROL_END><WS>
+<WS>
+<ID=ch><OP_DEFINE><WS><KW=2,KW_DEC_VAR><WS><ID=char><WS>
+<KW=21,KW_LOOP_WHILE><WS><OP_NOT><ID=eof><BLK='('><WS><ID=input><WS><BLK=')'><WS>
+<WS><ID=ch><WS><OP_ASSIGN><WS><ID=getchar><BLK='['><WS><ID=input><WS><BLK=']'><WS>
+<WS><KW=15,KW_CONTROL_IF><WS><ID=ch><WS><OP_LTHAN><WS><STR=" "><WS><WS>
+<WS><KW=15,KW_CONTROL_IF><WS><ID=ch><WS><OP_ASSIGN><WS><ID=LF><WS>
+<WS><ID=putchar><BLK='('><WS><ID=ch><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<WS><KW=18,KW_CONTROL_END><WS>
+<WS><KW=17,KW_CONTROL_ELSE><WS><WS>
+<WS><KW=15,KW_CONTROL_IF><WS><ID=ch><WS><OP_LTHAN><WS><ID=DEL><WS><WS>
+<WS><ID=putchar><BLK='('><WS><ID=ch><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<WS><KW=18,KW_CONTROL_END><WS>
+<WS><KW=18,KW_CONTROL_END><WS><WS>
+<KW=18,KW_CONTROL_END><WS><WS>
+<WS>
+<ID=putstring><OP_DEFINE><WS><KW=3,KW_DEC_PROC><BLK='('><WS><ID=s><OP_DEFINE><KW=10,KW_TYPE_ARRAY><WS><KW=13,KW_TYPE_OF><WS><ID=char><OP_COMMA><WS><ID=f><OP_DEFINE><ID=file><WS><BLK=')'><WS>
+<WS><WS>
+<WS><KW=24,KW_LOOP_FOR><WS><ID=i><WS><KW=14,KW_RANGE_IN><WS><ID=s><OP_FIELD><ID=min><WS><OP_RANGE><WS><ID=s><OP_FIELD><ID=max><WS>
+<WS><ID=putchar><BLK='('><WS><ID=s><BLK='('><ID=i><BLK=')'><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<WS><KW=18,KW_CONTROL_END><WS>
+<KW=18,KW_CONTROL_END><WS>
+<WS>
+<ID=putdecimal><OP_DEFINE><WS><KW=3,KW_DEC_PROC><BLK='('><WS><KW=1,KW_MOD_FINAL><WS><ID=n><OP_DEFINE><WS><ID=uint32><WS><BLK=')'><WS>
+<WS><WS>
+<WS><ID=quo><OP_DEFINE><WS><KW=2,KW_DEC_VAR><WS><ID=uint32><WS>
+<WS><ID=quo><WS><OP_ASSIGN><WS><ID=n><WS><OP_DIV><WS><NUM=10_10><WS>
+<WS><KW=15,KW_CONTROL_IF><WS><ID=quo><WS><OP_GTHAN><WS><NUM=0_10><WS><ID=putdecimal><BLK='('><WS><ID=quo><WS><BLK=')'><WS><KW=18,KW_CONTROL_END><WS>
+<WS><ID=putchar><BLK='('><WS><STR="0"><WS><OP_PLUS><WS><BLK='['><WS><ID=n><WS><OP_MOD><WS><NUM=10_10><WS><BLK=']'><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<KW=18,KW_CONTROL_END><WS>
+<WS>
+<ID=putnumber><OP_DEFINE><WS><KW=3,KW_DEC_PROC><BLK='('><WS><KW=1,KW_MOD_FINAL><WS><ID=n><OP_DEFINE><WS><ID=uint32><OP_COMMA><WS><KW=1,KW_MOD_FINAL><WS><ID=b><OP_DEFINE><WS><NUM=0_10><WS><OP_RANGE><WS><NUM=31_10><WS><BLK=')'><WS>
+<WS><WS>
+<WS><ID=digits><OP_DEFINE><WS><KW=0,KW_MOD_CONST><WS><STR="0123456789ABCDEFGHJKMNPQRSTVWXYZ"><WS>
+<WS><WS>
+<WS><WS>
+<WS><ID=quo><OP_DEFINE><WS><KW=2,KW_DEC_VAR><WS><ID=uint32><WS>
+<WS><ID=quo><WS><OP_ASSIGN><WS><ID=n><WS><OP_DIV><WS><ID=b><WS>
+<WS><KW=15,KW_CONTROL_IF><WS><ID=quo><WS><OP_GTHAN><WS><NUM=0_10><WS><ID=putdecimal><BLK='('><WS><ID=quo><OP_COMMA><WS><ID=b><WS><BLK=')'><WS><KW=18,KW_CONTROL_END><WS>
+<WS><ID=putchar><BLK='('><WS><ID=digits><BLK='['><WS><ID=n><WS><OP_MOD><WS><ID=b><WS><BLK=']'><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<KW=18,KW_CONTROL_END><WS>
+<WS>
+<WS><ID=putchar><BLK='('><WS><STR="0123456789ABCDEFGHJKMNPQRSTVWXYZ"><BLK='['><WS><ID=n><WS><OP_MOD><WS><NUM=10_10><WS><BLK=']'><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<WS>
+<ID=fib><OP_DEFINE><WS><KW=4,KW_DEC_FUNC><BLK='('><WS><KW=1,KW_MOD_FINAL><WS><ID=i><OP_DEFINE><ID=uint32><WS><BLK=')'><WS><ID=uint32><WS>
+<WS><KW=28,KW_EXCEPT_RETURN><WS><ID=i><WS>
+<WS><KW=15,KW_CONTROL_IF><WS><ID=i><WS><OP_GTHAN><WS><NUM=1_10><WS><KW=28,KW_EXCEPT_RETURN><WS><ID=fib><BLK='('><WS><ID=i><WS><OP_MINUS><WS><NUM=1_10><WS><BLK=')'><WS><OP_PLUS><WS><ID=fib><BLK='('><WS><ID=i><WS><OP_MINUS><WS><NUM=2_10><WS><BLK=')'><WS><KW=18,KW_CONTROL_END><WS>
+<KW=18,KW_CONTROL_END><WS>
+<WS>
+<WS><KW=15,KW_CONTROL_IF><WS><ID=i><WS><OP_GTHAN><WS><NUM=1_10><WS><KW=16,KW_CONTROL_THEN><WS>
+<WS><KW=28,KW_EXCEPT_RETURN><WS><ID=fib><BLK='('><WS><ID=i><WS><OP_MINUS><WS><NUM=1_10><WS><BLK=')'><WS><OP_PLUS><WS><ID=fib><BLK='('><WS><ID=i><WS><OP_MINUS><WS><NUM=2_10><WS><BLK=')'><WS>
+<WS><KW=17,KW_CONTROL_ELSE><WS>
+<WS><KW=28,KW_EXCEPT_RETURN><WS><ID=i><WS>
+<WS><KW=18,KW_CONTROL_END><WS>
+<WS>
+<KW=27,KW_EXCEPT_CATCH><WS><ID=range><WS><KW=14,KW_RANGE_IN><WS>
+<WS><KW=24,KW_LOOP_FOR><WS><ID=i><WS><KW=14,KW_RANGE_IN><WS><ID=uint32><WS><KW=22,KW_LOOP_DO><WS>
+<WS><ID=putstr><BLK='('><WS><STR="fib("><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<WS><ID=putdec><BLK='('><WS><ID=i><WS><BLK=')'><WS>
+<WS><ID=putstr><BLK='('><WS><STR=") = "><WS><BLK=')'><WS>
+<WS><ID=putdec><BLK='('><WS><ID=fib><BLK='('><WS><ID=i><WS><BLK=')'><WS><BLK=')'><WS>
+<WS><ID=putchar><BLK='('><WS><ID=NL><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<WS><KW=18,KW_CONTROL_END><WS>
+<KW=20,KW_CONTROL_CASE><WS><ID=range><OP_DEFINE><WS>
+<WS><ID=putstr><BLK='('><WS><STR="unprintable"><OP_PLUS><ID=NL><OP_COMMA><WS><ID=output><WS><BLK=')'><WS>
+<KW=18,KW_CONTROL_END><WS>
+}
+

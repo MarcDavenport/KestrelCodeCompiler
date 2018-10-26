@@ -41,16 +41,20 @@ int main(int argc , char** argv) {
       
       std::ostream* output = fout.good()?&fout:&std::cout;
 
+      *output << "SANITY PHASE {" << std::endl;
+      lex.WriteWords(*output);
+      *output << "}\n" << std::endl;
+      
       *output << "LEXING PHASE {" << std::endl;
       lex.WriteTags(*output);
-      *output << "}" << std::endl;
+      *output << "}\n" << std::endl;
       
       Parser parser;
       parser.Parse(lex.Tokens());
 
       *output << "PARSING PHASE {" << std::endl;
       parser.WriteTags(*output);
-      *output << "}" << std::endl;
+      *output << "}\n" << std::endl;
       
       fout.close();
    }
