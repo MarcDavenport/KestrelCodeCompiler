@@ -36,7 +36,7 @@
 		<Unit filename="EagleLicense.txt" />
 		<Unit filename="README.txt" />
 		<Unit filename="ksrc/example_kestrel.kes" />
-		<Unit filename="ksrc/example_kestrel.kes.klx.txt" />
+		<Unit filename="ksrc/example_kestrel.kes.kcc.txt" />
 		<Unit filename="src/Data.cpp" />
 		<Unit filename="src/Data.hpp" />
 		<Unit filename="src/Exception.cpp" />
@@ -49,11 +49,6 @@
 		<Unit filename="src/KString.hpp" />
 		<Unit filename="src/LexMain.cpp" />
 		<Unit filename="src/LexTable.hpp" />
-		<Unit filename="src/Lexer1.cpp">
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
-		<Unit filename="src/Lexer1.hpp" />
 		<Unit filename="src/Lexer2.cpp" />
 		<Unit filename="src/Lexer2.hpp" />
 		<Unit filename="src/ParseTree.cpp" />
