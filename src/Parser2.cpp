@@ -122,6 +122,18 @@ bool ParseTokenBLOCK::MatchesBlockChar(const KChar& kc) {
 
 
 
+bool ParseTokenBLOCK::IsOpenBlock() {
+   return (kchar == '(' || kchar == '[' || kchar == '{');
+}
+
+
+
+bool ParseTokenBLOCK::IsCloseBlock() {
+   return (kchar == ')' || kchar == ']' || kchar == '}');
+}
+
+
+
 std::string ParseTokenBLOCK::MakeTag() const {
    std::stringstream ss("");
    ss << "<BLK='" << LexerToken().Word() << "'>";
@@ -175,6 +187,162 @@ ParseToken::ParseToken(ParseTokenBase* base) :
 
 std::string ParseToken::MakeTag() const {
    return get()->MakeTag();
+}
+
+
+
+ParseTokenKEYWORD* ParseToken::GetKeywordToken() {
+   return dynamic_cast<ParseTokenKEYWORD*>(get());
+}
+
+
+
+ParseTokenID* ParseToken::GetIDToken() {
+   return dynamic_cast<ParseTokenID*>(get());
+}
+
+
+
+ParseTokenSTR* ParseToken::GetStringToken() {
+   return dynamic_cast<ParseTokenSTR*>(get());
+}
+
+
+
+ParseTokenNUM* ParseToken::GetNumToken() {
+   return dynamic_cast<ParseTokenNUM*>(get());
+}
+
+
+
+ParseTokenOP* ParseToken::GetOpToken() {
+   return dynamic_cast<ParseTokenOP*>(get());
+}
+
+
+
+ParseTokenBLOCK* ParseToken::GetBlockToken() {
+   return dynamic_cast<ParseTokenBLOCK*>(get());
+}
+
+
+
+bool ParseToken::IsKeyword() {
+   return (bool)GetKeywordToken();
+}
+
+
+
+bool ParseToken::IsID() {
+   return (bool)GetIDToken();
+}
+
+
+
+bool ParseToken::IsString() {
+   return (bool)GetStringToken();
+}
+
+
+
+bool ParseToken::IsNum() {
+   return (bool)GetNumToken();
+}
+
+
+
+bool ParseToken::IsBlock() {
+   return (bool)GetBlockToken();
+}
+
+
+
+bool ParseToken::IsOp() {
+   return (bool)GetOpToken();
+}
+
+
+
+bool ParseToken::IsOpenBlock() {
+   ParseTokenBLOCK* pblock = GetBlockToken();
+   return (pblock && pblock->IsOpenBlock());
+}
+
+
+
+bool ParseToken::IsCloseBlock() {
+   ParseTokenBLOCK* pblock = GetBlockToken();
+   return (pblock && pblock->IsCloseBlock());
+}
+
+
+
+KString ParseToken::GetKeyword() {
+   ParseTokenKEYWORD* ptoken = GetKeywordToken();
+   if (ptoken) {
+      return ptoken->LexerToken().Word();
+   }
+   return KString();
+}
+
+
+
+KString ParseToken::GetString() {
+   ParseTokenSTR* ptoken = GetStringToken();
+   if (ptoken) {
+      return ptoken->LexerToken().Word();
+   }
+   return KString();
+}
+
+
+
+KString ParseToken::GetID() {
+   ParseTokenID* ptoken = GetIDToken();
+   if (ptoken) {
+      return ptoken->LexerToken().Word();
+   }
+   return KString();
+}
+
+
+
+KEYWORD_GROUP ParseToken::GetKeywordGroup() {
+   ParseTokenKEYWORD* pkey = dynamic_cast<ParseTokenKEYWORD*>(get());
+   if (!pkey) {
+      return NUM_KEYWORD_GROUPS;
+   }
+   return pkey->Group();
+}
+
+
+
+KEYWORD_TYPE ParseToken::GetKeywordType() {
+   ParseTokenKEYWORD* pkey = dynamic_cast<ParseTokenKEYWORD*>(get());
+   if (!pkey) {
+      return NUM_KEYWORDS;
+   }
+   return pkey->WordType();
+}
+
+
+
+int ParseToken::GetNum() {
+   ParseTokenNUM* ptoken = GetNumToken();
+   if (ptoken) {
+      return ptoken->DecimalValue();
+   }
+   return 0xbaadf00d;//(0xBAADFOOD);
+}
+
+
+
+OPNUM ParseToken::GetOp() {
+   ParseTokenOP* pop = dynamic_cast<ParseTokenOP*>(get());
+   if (!pop) {
+      return NUM_OPS;
+   }
+   return pop->Op();
 }
 
 

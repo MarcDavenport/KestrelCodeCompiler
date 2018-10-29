@@ -8,14 +8,28 @@
 
 #include <memory>
 #include <list>
+#include <vector>
+#include <algorithm>
 
 #include "Data.hpp"
 #include "Parser2.hpp"
+ 
+
+
+
+
+
+
+
+
 
 class ParseNodeBase;
 
 class ParseNode {
    std::shared_ptr<ParseNodeBase> pbase;
+   
+   std::vector<ParseToken> exptokens;
+   
 public :
    ParseNode();
    ParseNode(ParseNodeBase* pnb);
@@ -28,13 +42,13 @@ ParseNode EmptyParseNode();
 class ParseNodeBase {
 
 protected :
-   OPNUM op;
-   ParseNode left;
-   ParseNode right;
 
 public :
    virtual ~ParseNodeBase() {}
-   virtual void Execute()=0;
+   
+   virtual int Execute()=0;
+   virtual void WriteStackCode()=0;
+   
 };
 
 
@@ -61,8 +75,6 @@ class KReference : ParseNodeBase {
 
 class KBlock {
    std::list<ParseNode> block_elements;
-   
-   
 };
 
 

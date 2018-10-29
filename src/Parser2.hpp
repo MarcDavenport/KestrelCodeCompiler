@@ -133,6 +133,8 @@ public :
    
    KChar BlockChar() {return kchar;}
    bool MatchesBlockChar(const KChar& kc);
+   bool IsOpenBlock();
+   bool IsCloseBlock();
    
    inline PARSE_TYPE ParserType() const override {return PARSE_BLOCK;}
 
@@ -185,9 +187,34 @@ public :
    inline const ParseTokenBase* get() const {return pbase.get();}
    
    std::string MakeTag() const;
+   
+   /// Flatten the interface
+   ParseTokenKEYWORD* GetKeywordToken();
+   ParseTokenID* GetIDToken();
+   ParseTokenSTR* GetStringToken();
+   ParseTokenNUM* GetNumToken();
+   ParseTokenBLOCK* GetBlockToken();
+   ParseTokenOP* GetOpToken();
+   
+   bool IsKeyword();
+   bool IsID();
+   bool IsString();
+   bool IsNum();
+   bool IsBlock();
+   bool IsOpenBlock();
+   bool IsCloseBlock();
+   bool IsOp();
+   
+   KString GetKeyword();
+   KString GetID();
+   KString GetString();
+
+   KEYWORD_GROUP GetKeywordGroup();
+   KEYWORD_TYPE GetKeywordType();
+
+   int GetNum();
+   OPNUM GetOp();
 };
-
-
 
 class Parser {
 protected :
@@ -201,6 +228,8 @@ public :
    void Parse(const std::vector<LexToken>& ltokens);
 
    void WriteTags(std::ostream& os);
+   
+   
 };
 
 

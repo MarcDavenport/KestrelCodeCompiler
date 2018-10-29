@@ -19,101 +19,73 @@ ParseNode EmptyParseNode() {return ParseNode();}
 
 
 
-ParseNode ParseDeclaration(std::vector<ParseToken>::iterator it , std::vector<ParseToken>::iterator itend) {
+ParseNode ParseDeclaration(TokenStream& input) {
    
-   bool priv = false;
-   bool restrict = false;
-
-   ParseTokenID* pid = 0;
-   ParseTokenKEYWORD* dectoken = 0;
-   ParseTokenOP* psop = 0;
+   if (input.AtEnd()) {return EmptyParseNode();}
+   if (!input.Peek()->IsID()) {
+      EAGLE_ASSERT(input.Peek()->IsID());
+      return EmptyParseNode();
+   }
 
    /// All declarations start with an identifier followed by the define operator :
 #if 0
    <declaration> ::= <identifier> ":" [ "private" | "restricted" ] <declarator>
 #endif   
-   std::vector<ParseToken>::iterator it2 = it;
 
-   if (it == itend) {return EmptyParseNode();}
+   bool priv = false;
+   bool restrict = false;
 
-   pid = dynamic_cast<ParseTokenID*>(it->get());/// save for later
+   std::vector<ParseToken*> dectokens = input.PeekN(4);
+   
+   
+   ParseTokenID* pid = dectokens[0]?dectokens[0]->GetIDToken():0;
+   ParseTokenOP* pop = dectokens[1]?dectokens[1]->GetOpToken():0;
+   ParseTokenKEYWORD* pmod = dectokens[2]?dectokens[2]->GetKeywordToken():0;
 
-   ++it2;
-   if (it->ParserType() != PARSE_IDENTIFIER) {
-       /// All declarations start with an identifier, return empty node
-       return EmptyParseNode();
-   }
-   if (it2 == itend) {
-#warning TODO : ERROR_MISSING_DECLARATION_OPERATOR undefined, also, this is clumsy
-///      error = "MISSING : in declaration\n";
-///      LogError(ERROR_MISSING_DECLARATION_OPERATOR , it2->LexToken());
-      goto error;
-   }
-   if (it2->ParserType() == PARSE_OPERATOR) {
-      psop = dynamic_cast<ParseTokenOP*>(it2->get());
-   }
-   if (!psop) {
-#warning TODO :       LogErrorExpected(RS_OPERATOR , it2->LexerToken());
-///      LogErrorExpected(RS_OPERATOR , it2->LexerToken());
-      goto error;
-   }
-   if (psop->Op() != OP_DEFINE) {
-      #warning ERROR_MISSING_DEFINE_OPERATOR error code unimplemented
-///      LogErrorExpected(ERROR_MISSING_DEFINE_OPERATOR , it2->LexerToken());
-      goto error;
-   }
-
-   /// Optional private or restricted keyword, followed by declarator  
-   ++it2;/// Move to optional keyword
-   if (it2 == itend) {
-      #warning ERROR_EXPRECTED_DECLARATOR error code unimplemented
-///      LogError(ERROR_EXPECTED_DECLARATOR , it2->LexerToken());
-      goto error;
-   }
-
-   if (it2->ParserType() == PARSE_KEYWORD) {
-      ParseTokenKEYWORD* ptkeyword = dynamic_cast<ParseTokenKEYWORD*>(it2->get());
-      if (ptkeyword->Group() == KWG_ACCESS && ptkeyword->WordType() == KW_ACC_PRIV) {
-         priv = true;
-      } else if (ptkeyword->Group() == KWG_ACCESS && ptkeyword->WordType() == KW_ACC_RESTRICT) {
-         restrict = true;
-      }
-      else {
-#warning TODO :          LogError(ERROR_ILLEGAL_KEYWORD_IN_DECLARATION , it2->LexToken());
-///         LogError(ERROR_ILLEGAL_KEYWORD_IN_DECLARATION , it2->LexToken());
-         goto error;
-      }
-      ++it2;
-      if (it2 == itend) {
-#warning TODO :          LogError(ERROR_EXPRECTED_DECLARATOR , it2->LexerToken());
-///         LogError(ERROR_EXPRECTED_DECLARATOR , it2->LexerToken());
-         goto error;
-      }
+   int dec = (pmod->Group() == KWG_ACCESS)?3:2;
+   if (dec == 3) {pmod = 0;}
+   ParseTokenKEYWORD* pdec = dectokens[dec]?dectokens[dec]->GetKeywordToken():0;
+   
+   if (!pid || (!pop || (pop && pop->Op() != OP_DEFINE)) || !pdec) {
+      LogError("Improperly formed declaration.\n");
    }
    
+   if (pmod) {
+      if (pmod->Group() == KWG_ACCESS) {
+         if (pmod->WordType() == KW_ACC_PRIV) {
+            priv = true;
+         } else if (pmod->WordType() == KW_ACC_RESTRICT) {
+            restrict = true;
+         }
+      }
+   }
    /// Declarator
+   std::vector<ParseToken> subtokens(ParseToken() , (dec == 3)?4:3);
    
-   if (it2->ParserType() != PARSE_KEYWORD) {
-#warning TODO :       LogErrorExpected(ERROR_MISSING_KEYWORD , it2->LexerToken());
-///      LogErrorExpected(ERROR_MISSING_KEYWORD , it2->LexerToken());
-      goto error;
+   if (dectoken->Group() == KWG_DECLARATION) {
+      if (dectoken->WordType() == KW_DEC_VAR) {
+         /// A var, easy
+         
+      }
+      else if (pdec->WordType() == KW_DEC_PROC) {
+            
+      }
+      else if (pdec->WordType() == KW_DEC_FUNC) {
+            
+      }
    }
-
-   dectoken = dynamic_cast<ParseTokenKEYWORD*>(it2->get());
+   else if (pdec->Group() == KWG_MODIFIER) {
+      if (pdec->WordType() == KW_MOD_CONST) {
+         
+      }
+      else if (pdec->WordType() == KW_MOD_FINAL) {
+         
+      }
+   }
+   else if (pdec->WordType() == KW_EXCEPT_EXCEPTION) {
+                                       
+   }
    
-   EAGLE_ASSERT(dectoken);
-   
-///   if (kwtoken->Group() !=
-   
-   
-///   switch
-   
-   
-   
-   
-///   return KDeclaration(...);
-   
-   error:
    return EmptyParseNode();
 }
 #if 0
