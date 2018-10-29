@@ -34,6 +34,7 @@
 			<Add option="-DEAGLE_ASSERT_EXCEPTION" />
 		</Compiler>
 		<Unit filename="EagleLicense.txt" />
+		<Unit filename="Notes.txt" />
 		<Unit filename="README.txt" />
 		<Unit filename="ksrc/example_kestrel.kes" />
 		<Unit filename="ksrc/example_kestrel.kes.kcc.txt" />
@@ -59,6 +60,8 @@
 		<Unit filename="src/Parser2.hpp" />
 		<Unit filename="src/Rosetta.cpp" />
 		<Unit filename="src/Rosetta.hpp" />
+		<Unit filename="src/TokenStream.cpp" />
+		<Unit filename="src/TokenStream.hpp" />
 		<Unit filename="src/Utility.cpp" />
 		<Unit filename="src/Utility.hpp" />
 		<Extensions>
