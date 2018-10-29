@@ -34,6 +34,8 @@ protected :
    virtual void LogErr(ERRID eid , int linenum = -1 , int colnum = -1);
 public :
 
+   virtual ~RosettaStone() {}
+   
    static RosettaStone* translator;
 
    static void LogError(ERRID eid , int linenum = -1 , int colnum = -1);
