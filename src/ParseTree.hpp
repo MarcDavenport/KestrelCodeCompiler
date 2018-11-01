@@ -55,11 +55,16 @@ public :
 class KDeclaration : ParseNodeBase {
    bool is_private;
    bool is_restricted;
-   ParseTokenID* pid;
    
    
    
 };
+
+class KVarDeclaration : KDeclaration {
+   KString name;
+   KString type;
+};
+
 
 class KStatement : ParseNodeBase {
    

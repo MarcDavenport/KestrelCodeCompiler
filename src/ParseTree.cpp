@@ -37,6 +37,10 @@ ParseNode ParseDeclaration(TokenStream& input) {
 
    std::vector<ParseToken*> dectokens = input.PeekN(4);
    
+   if (!input.PeekNABool(4) && !input.PeekNABool(3)) {
+      LogError("Incomple definition. Tokens missing.");/// how do we get a line number if there is no token
+      return EmptyParseNode();
+   }
    
    ParseTokenID* pid = dectokens[0]?dectokens[0]->GetIDToken():0;
    ParseTokenOP* pop = dectokens[1]?dectokens[1]->GetOpToken():0;
@@ -65,7 +69,14 @@ ParseNode ParseDeclaration(TokenStream& input) {
    if (dectoken->Group() == KWG_DECLARATION) {
       if (dectoken->WordType() == KW_DEC_VAR) {
          /// A var, easy
-         
+         ParseToken ptype;
+         if (!input.Peek() || (input.Peek() && input.Peek()->IsID()) || !input.Extract(&ptype)) {
+            LogError("Expected type declaration for var.");
+         }
+         else {
+            ParseTokenID* pid = ptype.GetIDTOken()
+            return KVarDeclaration(subtokens[0] /* name */ , ptype /* type */);
+         }
       }
       else if (pdec->WordType() == KW_DEC_PROC) {
             
@@ -83,7 +94,7 @@ ParseNode ParseDeclaration(TokenStream& input) {
       }
    }
    else if (pdec->WordType() == KW_EXCEPT_EXCEPTION) {
-                                       
+      return new KException(
    }
    
    return EmptyParseNode();

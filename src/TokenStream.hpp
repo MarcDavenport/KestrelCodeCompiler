@@ -26,6 +26,9 @@ public :
    ParseToken*              Peek ();
    std::vector<ParseToken*> PeekN(unsigned int N);
    
+   bool PeekABool()
+   bool PeekNABool(unsigned int N)
+   
    bool         Extract  (ParseToken* pstore);
    bool         ExtractTo(std::vector<ParseToken>& tokvec);
    unsigned int ExtractN (unsigned int N , ParseToken* pstore);

@@ -31,12 +31,29 @@ ParseToken* TokenStream::Peek() {
 
 
 
-std::vector<ParseToken*> PeekN(unsigned int N) {
+std::vector<ParseToken*> TokenStream::PeekN(unsigned int N) {
    std::vector<ParseToken*> tokens((ParseToken*)0 , N);
    for (unsigned int it = iter ; (it < iter + N) && (it < ptokens.size()) ; ++it) {
       tokens[it - iter] = &(ptokens[it]);
    }
    return tokens;
+}
+
+
+
+bool TokenStream::PeekABool() {
+   return (bool)Peek();
+}
+
+
+
+bool TokenStream::PeekNABool(unsigned int N) {
+   std::vector<ParseToken*> peekn = PeekN(N);
+   if (!peekn.size()) {return false;}
+   for (unsigned int i = 0 ; i < peekn.size() ; ++i) {
+      if (!peekn[i]) {return false;}
+   }
+   return true;
 }
 
 
